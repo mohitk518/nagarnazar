@@ -1,3 +1,4 @@
+import { fetchAiStream } from "@/lib/invoke-function";
 import { useUiText } from "@/hooks/useUiText";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -11,7 +12,6 @@ import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string; isSystemError?: boolean };
 
-const CHAT_URL = "/api/public/fn/civic-chat";
 
 const QUICK_PROMPTS_EN = [
   "How many complaints are pending?",
@@ -52,7 +52,7 @@ const AIChatbot = () => {
   const streamChat = async (allMessages: Msg[]) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) throw new Error(tx("Please sign in to chat with Civic AI."));
-    const resp = await fetch(CHAT_URL, {
+    const resp = await fetchAiStream("civic-chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

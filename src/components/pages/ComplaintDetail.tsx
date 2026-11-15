@@ -206,6 +206,13 @@ const ComplaintDetail = () => {
               {complaint.ai_summary}
             </p>
           )}
+          {!complaint.ai_summary && Date.now() - new Date(complaint.created_at).getTime() < 24 * 3600 * 1000 && (
+            <p className="mb-3 rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">
+              {language === "hi"
+                ? "🤖 AI सारांश थोड़ी देर में जुड़ेगा। शिकायत नागरिक की चुनी श्रेणी के साथ दर्ज है।"
+                : "🤖 The AI summary will be added shortly. The complaint is filed with the category the citizen chose."}
+            </p>
+          )}
           <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{complaint.description}</p>
 
           <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground flex-wrap">

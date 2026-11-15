@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCaller, isStaff, canManageCity, sanitizeChat, jsonError, enforceAiQuota } from "@/lib/api-guard";
 import { createClient } from "@supabase/supabase-js";
@@ -99,7 +100,7 @@ Avg resolution time: ${avgResolutionDays} days
 Provide actionable insights and trends. Be concise and direct.`;
 
       try {
-        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiResponse = await callAiGateway({
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,

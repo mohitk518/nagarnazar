@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCaller, isStaff, canManageCity, sanitizeChat, jsonError, enforceAiQuota } from "@/lib/api-guard";
 import { createClient } from "@supabase/supabase-js";
@@ -73,7 +74,7 @@ Guidelines:
     : "Reply in English unless the user clearly writes in Hindi."}
 - Keep responses under 200 words unless asked for detail`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await callAiGateway({
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,

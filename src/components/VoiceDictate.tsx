@@ -1,5 +1,5 @@
 import { useUiText } from "@/hooks/useUiText";
-import { invokeFunction } from "@/lib/invoke-function";
+import { invokeFunction, AI_VOICE_TIMEOUT_MS } from "@/lib/invoke-function";
 import { useRef, useState } from "react";
 import { Mic, Loader2, Square } from "lucide-react";
 import { toast } from "sonner";
@@ -48,6 +48,7 @@ const VoiceDictate = ({ onTranscribed }: Props) => {
 
           const { data, error } = await invokeFunction("voice-stt", {
             body: { audio: base64, mimeType: "audio/webm" },
+            timeoutMs: AI_VOICE_TIMEOUT_MS,
           });
           if (error) throw error;
           const text = (data as { text?: string; error?: string })?.text;

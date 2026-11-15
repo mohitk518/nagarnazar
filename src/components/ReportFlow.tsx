@@ -61,6 +61,7 @@ import {
   hasContent,
 } from "@/lib/draft";
 import { useCityWards, wardLabel, insertComplaintWithWard } from "@/lib/wards";
+import { queueAiSummaryRetry } from "@/lib/ai-retry";
 
 const LocationMapPicker = lazy(() => import("@/components/LocationMapPicker"));
 
@@ -122,6 +123,7 @@ export default function ReportFlow() {
   syncStateRef.current = syncState;
 
   const [submittedId, setSubmittedId] = useState("");
+  const [aiPending, setAiPending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -505,16 +507,24 @@ export default function ReportFlow() {
       }
 
       // AI summary runs in the background and never blocks reporting
-      invokeFunction("generate-summary", {
-        body: {
-          complaint_id: data.id,
-          title,
-          description,
-          category: selectedCategory,
-          location,
-          priority,
-        },
-      }).catch((err) => console.error("AI summary error:", err));
+      // AI summary runs in the background and never blocks reporting. If it fails, the complaint
+      // keeps the citizen's own category and the summary is retried later automatically.
+      const summaryBody = {
+        complaint_id: data.id,
+        title,
+        description,
+        category: selectedCategory,
+        location,
+        priority,
+      };
+      setAiPending(false);
+      void invokeFunction("generate-summary", { body: summaryBody }).then(({ error: aiError }) => {
+        if (aiError) {
+          console.warn("AI summary deferred:", aiError.message);
+          queueAiSummaryRetry(data.id, summaryBody);
+          setAiPending(true);
+        }
+      });
 
       setSyncState("sent");
       setSubmittedId(data.complaint_id);
@@ -761,6 +771,17 @@ export default function ReportFlow() {
               ? "विभाग और समय सीमा अपने आप तय हो गई है। आप इसे लाइव ट्रैक कर सकते हैं।"
               : "It has been routed to a department with a deadline. You can track it live."}
           </p>
+          {aiPending && (
+            <p
+              role="note"
+              className="mt-2 flex items-start gap-2 rounded-xl bg-card/70 px-3 py-2 text-sm text-foreground"
+            >
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              {hi
+                ? "AI विश्लेषण बाद में होगा — AI अभी व्यस्त है। आपकी शिकायत आपकी चुनी श्रेणी के साथ दर्ज हो गई है; हम अपने आप दोबारा कोशिश करेंगे।"
+                : "AI analysis will happen later — the AI service is busy. Your complaint is saved with the category you chose; we'll retry automatically."}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               to={`/complaints/${submittedId}`}

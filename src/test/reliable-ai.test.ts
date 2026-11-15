@@ -10,9 +10,11 @@ describe("reliable AI calls", () => {
     expect(isRetryableStatus(400)).toBe(false);
     expect(isRetryableStatus(401)).toBe(false);
   });
-  it("retries twice with growing, capped backoff and a 20s timeout", () => {
+  it("retries twice with growing, capped backoff and a ~15s timeout", () => {
     expect(AI_MAX_RETRIES).toBe(2);
-    expect(AI_TIMEOUT_MS).toBe(20000);
+    expect(AI_TIMEOUT_MS).toBe(15000);
+    expect(backoffMs(0)).toBe(1000);
+    expect(backoffMs(1)).toBe(2000);
     expect(backoffMs(0)).toBeLessThan(backoffMs(1));
     expect(backoffMs(10)).toBe(4000);
   });

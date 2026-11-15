@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { getCaller, isStaff } from "@/lib/api-guard";
@@ -99,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (LOVABLE_API_KEY && body.trim().length > 5) {
       try {
-        const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const aiResp = await callAiGateway({
           method: "POST",
           headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({

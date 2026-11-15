@@ -21,6 +21,7 @@ import { useUiText } from "@/hooks/useUiText";
 import { Button } from "@/components/ui/button";
 import NotFound from "@/components/pages/NotFound";
 import { registerServiceWorker } from "@/lib/sw-register";
+import { startAiRetryLoop } from "@/lib/ai-retry";
 
 function ErrorComponent(props: ErrorComponentProps) {
   return <LanguageProvider><LocalizedError {...props} /></LanguageProvider>;
@@ -138,6 +139,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     registerServiceWorker();
+    return startAiRetryLoop();
   }, []);
 
   return (

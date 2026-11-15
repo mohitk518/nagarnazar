@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCaller, isStaff, canManageCity, sanitizeChat, jsonError, enforceAiQuota } from "@/lib/api-guard";
 
@@ -28,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     const LOVABLE_API_KEY = process.env["LOVABLE_API_KEY"];
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await callAiGateway({
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,

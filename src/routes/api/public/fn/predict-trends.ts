@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCaller, isStaff, canManageCity, sanitizeChat, jsonError, enforceAiQuota } from "@/lib/api-guard";
 import { createClient } from "@supabase/supabase-js";
@@ -74,7 +75,7 @@ ${lang === "hi"
   ? "IMPORTANT: Write every human-readable text field ('insight' and 'summary') in natural, fluent Hindi using Devanagari script. Keep the 'trend' enum values exactly as 'rising'/'stable'/'declining' in English, but translate all descriptive text into Hindi."
   : "Write all human-readable text in English."}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await callAiGateway({
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,

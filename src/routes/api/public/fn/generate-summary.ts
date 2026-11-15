@@ -1,3 +1,4 @@
+import { callAiGateway } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { getCaller, isStaff, canManageCity, sanitizeChat, jsonError, enforceAiQuota } from "@/lib/api-guard";
 import { createClient } from "@supabase/supabase-js";
@@ -22,9 +23,13 @@ const handler = async (req: Request): Promise<Response> => {
     const { complaint_id, title, description, category, location } = await req.json();
     if (!complaint_id) return jsonError(400, "complaint_id is required");
     const admin = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_SERVICE_ROLE_KEY"]!);
-    const { data: owned } = await admin.from("complaints").select("user_id, city, priority, created_at").eq("id", complaint_id).maybeSingle();
+    const { data: owned } = await admin.from("complaints").select("user_id, city, priority, created_at, ai_summary").eq("id", complaint_id).maybeSingle();
     if (!owned) return jsonError(404, "Complaint not found");
-    const isOwnerFresh = owned.user_id === caller.user.id && Date.now() - new Date(owned.created_at).getTime() < 15 * 60 * 1000;
+    // The reporter may (re)request the summary right after reporting, and — if the AI was busy —
+    // retry for up to 24 h while the complaint still has no summary ("AI analysis later").
+    const ageMs = Date.now() - new Date(owned.created_at).getTime();
+    const isOwner = owned.user_id === caller.user.id;
+    const isOwnerFresh = isOwner && (ageMs < 15 * 60 * 1000 || (!owned.ai_summary && ageMs < 24 * 60 * 60 * 1000));
     if (!isOwnerFresh && !(await canManageCity(caller, owned.city))) return jsonError(403, "Not allowed for this complaint");
     const priority = owned.priority;
 
@@ -46,7 +51,7 @@ Complaint details:
 
 Return ONLY valid JSON, no markdown, no explanation.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await callAiGateway({
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
