@@ -5,6 +5,7 @@ import { User, Trophy, Medal, Star, Shield, FileText, Clock, TrendingUp, AlertCi
 import SmsOptInCard from "@/components/SmsOptInCard";
 import HomeCityCard from "@/components/HomeCityCard";
 import Layout from "@/components/Layout";
+import DeleteAccountCard from "@/components/DeleteAccountCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -389,6 +390,10 @@ const Profile = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        <div id="privacy-settings" className="mt-6 scroll-mt-20">
+          <DeleteAccountCard />
+        </div>
       </div>
     </Layout>
   );

@@ -2,7 +2,7 @@ import { useUiText } from "@/hooks/useUiText";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, MapPin } from "lucide-react";
-import { useNavigate } from "@/lib/router-compat";
+import { useNavigate, Link } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import Layout from "@/components/Layout";
@@ -30,7 +30,7 @@ const Auth = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const NETWORK_ERROR_REGEX = /(failed to fetch|networkerror|load failed)/i;
   const EMAIL_NOT_CONFIRMED_REGEX = /email not confirmed/i;
@@ -283,11 +283,20 @@ const Auth = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-lg gradient-accent text-accent-foreground font-semibold flex items-center justify-center gap-2 shadow-elevated disabled:opacity-50 transition-transform hover:scale-[1.02]"
+                className="w-full min-h-12 py-3 rounded-full gradient-accent font-bold flex items-center justify-center gap-2 shadow-elevated disabled:opacity-50 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 {loading ? t("auth.pleaseWait") : isLogin ? t("auth.signIn") : t("auth.createAccountBtn")}
                 <ArrowRight className="w-4 h-4" />
               </button>
+              {!isLogin && (
+                <p className="text-center text-xs text-muted-foreground">
+                  {language === "hi" ? "खाता बनाकर आप हमारी " : "By creating an account you agree to our "}
+                  <Link to="/privacy" className="font-semibold text-primary underline">
+                    {language === "hi" ? "गोपनीयता नीति" : "privacy notice"}
+                  </Link>
+                  {language === "hi" ? " से सहमत हैं।" : "."}
+                </p>
+              )}
             </form>
 
             <div className="relative my-6">
