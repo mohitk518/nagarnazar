@@ -18,6 +18,9 @@ import AdminRequestsManager from "@/components/AdminRequestsManager";
 import { useAdminCities } from "@/hooks/useAdminCities";
 import { useCities } from "@/hooks/useCities";
 import { useIsRootAdmin } from "@/hooks/useIsRootAdmin";
+import WardSummary from "@/components/WardSummary";
+import StatusChip from "@/components/StatusChip";
+import { useWardLookup, wardLabel } from "@/lib/wards";
 
 const Admin = () => {
   const tx = useUiText();
@@ -28,6 +31,9 @@ const Admin = () => {
   const { t } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [cityFilter, setCityFilter] = useState<string>("all");
+  const [wardFilter, setWardFilter] = useState<string>("all");
+  const { language } = useLanguage();
+  const { data: wardMap = {} } = useWardLookup();
   const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
   const [newStatus, setNewStatus] = useState<ComplaintStatus>("in-progress");
   const [note, setNote] = useState("");
@@ -205,6 +211,15 @@ const Admin = () => {
     );
   }
 
+  // Ward filter (client-side, on top of the city/status filters)
+  const visibleComplaints =
+    wardFilter === "all"
+      ? complaints
+      : complaints.filter((c: any) => (wardFilter === "none" ? !c.ward_id : c.ward_id === wardFilter));
+  const wardOptions = Object.values(wardMap)
+    .filter((w) => (cityFilter === "all" ? !assignedCities || assignedCities.includes(w.city) : w.city === cityFilter))
+    .sort((a, b) => a.city.localeCompare(b.city) || a.ward_number - b.ward_number);
+
   const statusCounts = {
     all: complaints.length,
     pending: complaints.filter((c: any) => c.status === "pending").length,
@@ -265,17 +280,45 @@ const Admin = () => {
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <select
             value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-            className="rounded-lg border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) => {
+              setCityFilter(e.target.value);
+              setWardFilter("all");
+            }}
+            aria-label={tx("All cities ")}
+            className="min-h-11 rounded-full border border-input bg-card px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">{tx("All cities ")}{assignedCities ? "" : "(you manage)"}</option>
             {cityOptions.map(({ city, source }) => (
               <option key={city} value={city}>{city} — {sourceLabel(source)}</option>
             ))}
           </select>
+          <select
+            value={wardFilter}
+            onChange={(e) => setWardFilter(e.target.value)}
+            aria-label={language === "hi" ? "वार्ड" : "Ward"}
+            className="min-h-11 rounded-full border border-input bg-card px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="all">{language === "hi" ? "सभी वार्ड" : "All wards"}</option>
+            <option value="none">{language === "hi" ? "वार्ड तय नहीं" : "Ward not set"}</option>
+            {wardOptions.map((w) => (
+              <option key={w.id} value={w.id}>
+                {cityFilter === "all" ? `${w.city} · ` : ""}
+                {wardLabel(w, language === "hi")}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <WardSummary
+          complaints={complaints as any}
+          wards={wardMap}
+          onPickWard={(id) => {
+            setWardFilter(id);
+            document.getElementById("admin-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        />
+
+        <div id="admin-list" className="flex gap-2 mb-6 overflow-x-auto pb-2 scroll-mt-20">
           {(["all", "pending", "in-progress", "resolved", "escalated"] as const).map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
@@ -290,13 +333,13 @@ const Admin = () => {
             <button
               type="button"
               onClick={() => {
-                const visibleIds = complaints.map((c: any) => c.id);
+                const visibleIds = visibleComplaints.map((c: any) => c.id);
                 if (selectedIds.size === visibleIds.length && visibleIds.length > 0) clearSelection();
                 else selectAllVisible(visibleIds);
               }}
               className="text-xs font-medium text-foreground hover:text-primary"
             >
-              {selectedIds.size === complaints.length && complaints.length > 0 ? tx("Clear all") : tx("Select all visible")}
+              {selectedIds.size === visibleComplaints.length && visibleComplaints.length > 0 ? tx("Clear all") : tx("Select all visible")}
             </button>
             <span className="text-xs text-muted-foreground">
               {selectedIds.size} {tx(" selected ")}</span>
@@ -324,9 +367,8 @@ const Admin = () => {
         </div>
 
         <div className="space-y-3">
-          {complaints.map((c: any) => {
+          {visibleComplaints.map((c: any) => {
             const catConfig = CATEGORY_CONFIG[c.category as ComplaintCategory];
-            const sConfig = STATUS_CONFIG[c.status as ComplaintStatus];
             const checked = selectedIds.has(c.id);
             return (
               <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -348,7 +390,12 @@ const Admin = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-xs font-mono text-muted-foreground">#{c.complaint_id}</span>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: (sConfig?.color || "") + "18", color: sConfig?.color }}>{tx(sConfig?.label)}</span>
+                      <StatusChip status={c.status} dueAt={c.due_at} />
+                      {c.ward_id && wardMap[c.ward_id] ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground font-semibold">🏘️ {wardLabel(wardMap[c.ward_id], language === "hi")}</span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning font-semibold">{language === "hi" ? "वार्ड तय नहीं" : "Ward not set"}</span>
+                      )}
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{tx(catConfig?.label)}</span>
                       {c.priority === "emergency" && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">🚨 {t("common.emergency")}</span>}
                     </div>
@@ -401,7 +448,7 @@ const Admin = () => {
               </motion.div>
             );
           })}
-          {complaints.length === 0 && (
+          {visibleComplaints.length === 0 && (
             <div className="text-center py-12 text-muted-foreground"><p className="text-lg font-medium">{t("admin.noComplaints")}</p></div>
           )}
         </div>

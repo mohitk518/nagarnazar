@@ -10,6 +10,7 @@ export interface ComplaintDraft {
   manualLat: string;
   manualLng: string;
   anonymous: boolean;
+  ward?: string;
   photoDataUrl?: string;
   photoName?: string;
   photoType?: string;

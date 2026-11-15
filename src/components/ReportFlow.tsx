@@ -53,6 +53,7 @@ import {
   type RecentLocation,
 } from "@/lib/recent-locations";
 import { loadDraft, saveDraft, clearDraft, fileToDataUrl, dataUrlToFile } from "@/lib/draft";
+import { useCityWards, wardLabel, insertComplaintWithWard } from "@/lib/wards";
 
 const LocationMapPicker = lazy(() => import("@/components/LocationMapPicker"));
 
@@ -104,6 +105,8 @@ export default function ReportFlow() {
   const [city, setCity] = useState<string>(() => localStorage.getItem("ct_city") || DEFAULT_CITY);
   const [cityFromProfile, setCityFromProfile] = useState(false);
   const [anonymous, setAnonymous] = useState(initialDraft.anonymous ?? false);
+  const [reportedWard, setReportedWard] = useState<string>(initialDraft.ward || "");
+  const { data: cityWards = [] } = useCityWards(city);
   const [photo, setPhoto] = useState<File | null>(() => {
     if (initialDraft.photoDataUrl && initialDraft.photoName && initialDraft.photoType) {
       return dataUrlToFile(
@@ -184,6 +187,7 @@ export default function ReportFlow() {
         manualLat,
         manualLng,
         anonymous,
+        ward: reportedWard,
         photoDataUrl: photoDataUrl ?? undefined,
         photoName: photoName ?? undefined,
         photoType: photoType ?? undefined,
@@ -199,6 +203,7 @@ export default function ReportFlow() {
     manualLat,
     manualLng,
     anonymous,
+    reportedWard,
     photoDataUrl,
     photoName,
     photoType,
@@ -444,28 +449,33 @@ export default function ReportFlow() {
 
       const { lat, lng } = resolveCoords();
 
-      const { data, error } = await supabase
-        .from("complaints")
-        .insert({
-          user_id: user.id,
-          title,
-          description,
-          category: selectedCategory,
-          priority,
-          photo_url: photoUrl,
-          location,
-          anonymous,
-          city,
-          latitude: lat,
-          longitude: lng,
-          submitted_by: anonymous
-            ? "Anonymous"
-            : user.user_metadata?.full_name || user.email || "Citizen",
-        })
-        .select("id, complaint_id")
-        .single();
+      const payload = {
+        user_id: user.id,
+        title,
+        description,
+        category: selectedCategory,
+        priority,
+        photo_url: photoUrl,
+        location,
+        anonymous,
+        city,
+        latitude: lat,
+        longitude: lng,
+        submitted_by: anonymous ? "Anonymous" : user.user_metadata?.full_name || user.email || "Citizen",
+      };
+      const { data, error } = await insertComplaintWithWard<{ id: string; complaint_id: string }>(
+        async (row) =>
+          await supabase
+            .from("complaints")
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .insert(row as any)
+            .select("id, complaint_id")
+            .single(),
+        payload,
+        /^\d+$/.test(reportedWard) ? `Ward ${reportedWard}` : reportedWard,
+      );
 
-      if (error) throw error;
+      if (error || !data) throw error ?? new Error("Insert failed");
 
       if (lat !== null && lng !== null) {
         pushRecentLocation({ label: location, lat, lng });
@@ -497,6 +507,7 @@ export default function ReportFlow() {
       setDetectedAddress(null);
       setPriority("medium");
       setAnonymous(false);
+      setReportedWard("");
       removePhoto();
       setDuplicateWarning(null);
       setDraftRestored(false);
@@ -562,6 +573,7 @@ export default function ReportFlow() {
     setManualLng("");
     setPriority("medium");
     setAnonymous(false);
+    setReportedWard("");
     removePhoto();
     setDraftRestored(false);
     setStep(0);
@@ -1120,6 +1132,48 @@ export default function ReportFlow() {
                   lng={manualLng ? parseFloat(manualLng) : detectedLng}
                 />
 
+                {/* Ward / zone — the official ward is still set by the server from GPS */}
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <label htmlFor="nn-ward" className="block text-sm font-semibold text-foreground">
+                    {hi ? "वार्ड" : "Ward"}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      {hi ? "(वैकल्पिक — पता हो तो चुनें)" : "(optional — choose if you know it)"}
+                    </span>
+                  </label>
+                  {cityWards.length > 0 ? (
+                    <select
+                      id="nn-ward"
+                      value={reportedWard}
+                      onChange={(e) => setReportedWard(e.target.value)}
+                      className={inputCls + " mt-2 min-h-11"}
+                    >
+                      <option value="">{hi ? "पता नहीं — GPS से तय करें" : "Not sure — use GPS"}</option>
+                      {cityWards.map((w) => {
+                        const label = wardLabel(w, hi);
+                        return (
+                          <option key={w.id} value={wardLabel(w)}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  ) : (
+                    <input
+                      id="nn-ward"
+                      inputMode="numeric"
+                      value={reportedWard}
+                      onChange={(e) => setReportedWard(e.target.value.replace(/[^\d]/g, "").slice(0, 4))}
+                      placeholder={hi ? "वार्ड नंबर, जैसे 12" : "Ward number, e.g. 12"}
+                      className={inputCls + " mt-2"}
+                    />
+                  )}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {hi
+                      ? "आधिकारिक वार्ड GPS से अपने आप तय होता है; आपका चुना वार्ड अधिकारी को मदद करता है।"
+                      : "The official ward is set automatically from GPS; your choice helps the officer confirm it."}
+                  </p>
+                </div>
+
                 {detectedAddress && location.trim() !== detectedAddress && (
                   <button
                     type="button"
@@ -1314,6 +1368,17 @@ export default function ReportFlow() {
                       { label: t("form.description"), value: description, step: 2 },
                       { label: t("form.location"), value: location, step: 1 },
                       { label: hi ? "शहर" : "City", value: city, step: 1 },
+                      {
+                        label: hi ? "वार्ड" : "Ward",
+                        value: reportedWard
+                          ? /^\d+$/.test(reportedWard)
+                            ? `${hi ? "वार्ड" : "Ward"} ${reportedWard}`
+                            : reportedWard
+                          : hi
+                            ? "GPS से तय होगा"
+                            : "Set from GPS",
+                        step: 1,
+                      },
                       { label: t("form.priority"), value: tx(priority), step: 2 },
                       {
                         label: hi ? "पहचान" : "Identity",

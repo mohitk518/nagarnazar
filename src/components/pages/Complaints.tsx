@@ -11,6 +11,7 @@ import SatisfactionRating from "@/components/SatisfactionRating";
 import SLACountdown from "@/components/SLACountdown";
 import SentimentBadge from "@/components/SentimentBadge";
 import StatusChip from "@/components/StatusChip";
+import { useWardLookup, wardLabel } from "@/lib/wards";
 import VerifyButton from "@/components/VerifyButton";
 import ExportButtons from "@/components/ExportButtons";
 import { lazy, Suspense } from "react";
@@ -47,6 +48,7 @@ const Complaints = () => {
   const { user } = useAuth();
   // "My complaints" view (bottom bar) — /complaints?mine=1
   const routerLocation = useLocation();
+  const { data: wardMap = {} } = useWardLookup();
   const mineOnly = new URLSearchParams(routerLocation.search).get("mine") === "1";
 
   const { data: myProfile } = useQuery({
@@ -197,6 +199,11 @@ const Complaints = () => {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-xs font-mono text-muted-foreground">#{c.complaint_id}</span>
                       <StatusChip status={c.status} dueAt={c.due_at} />
+                      {c.ward_id && wardMap[c.ward_id] && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground font-semibold">
+                          🏘️ {wardLabel(wardMap[c.ward_id], language === "hi")}
+                        </span>
+                      )}
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{tx(catConfig?.label)}</span>
                       {(c.priority === "high" || c.priority === "emergency") && (
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">

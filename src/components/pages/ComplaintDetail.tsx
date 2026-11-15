@@ -20,6 +20,8 @@ import DuplicateMergePanel from "@/components/DuplicateMergePanel";
 import { ESCALATION_LABEL } from "@/lib/accountability";
 import { CATEGORY_CONFIG, STATUS_CONFIG, ComplaintCategory } from "@/lib/types";
 import StatusChip from "@/components/StatusChip";
+import { useWardLookup, wardLabel, fetchReportedWards } from "@/lib/wards";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { COMPLAINT_COLS, DEPARTMENT_COLS_PUBLIC } from "@/lib/db-columns";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +31,8 @@ const ComplaintDetail = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [qrOpen, setQrOpen] = useState(false);
+  const { language } = useLanguage();
+  const { data: wardMap = {} } = useWardLookup();
 
   // Lookup by either UUID `id` or human-readable `complaint_id`
   const { data: complaint, isLoading } = useQuery({
@@ -75,6 +79,13 @@ const ComplaintDetail = () => {
         .maybeSingle();
       return data;
     },
+  });
+
+  // Ward the citizen chose (only once the reported_ward column exists)
+  const { data: reportedWard } = useQuery({
+    queryKey: ["complaint-reported-ward", complaint?.id],
+    enabled: !!complaint?.id,
+    queryFn: async () => (await fetchReportedWards([complaint!.id]))[complaint!.id] ?? null,
   });
 
   // Realtime updates for this complaint
@@ -153,7 +164,16 @@ const ComplaintDetail = () => {
                 🌆 {tx(complaint.city)}
               </span>
             )}
-            {(complaint as { zone?: string | null }).zone && (
+            {complaint.ward_id && wardMap[complaint.ward_id] ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-accent-foreground">
+                🏘️ {wardLabel(wardMap[complaint.ward_id], language === "hi")}
+              </span>
+            ) : reportedWard ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                🏘️ {reportedWard} {language === "hi" ? "(नागरिक ने बताया)" : "(reported by citizen)"}
+              </span>
+            ) : null}
+            {!(complaint.ward_id && wardMap[complaint.ward_id]) && (complaint as { zone?: string | null }).zone && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/15 text-foreground font-medium">
                 🗺️ {(complaint as { zone?: string | null }).zone}
               </span>
