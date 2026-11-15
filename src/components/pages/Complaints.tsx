@@ -2,7 +2,7 @@ import { useUiText } from "@/hooks/useUiText";
 import { COMPLAINT_COLS, PROFILE_COLS, DEPARTMENT_COLS_PUBLIC } from "@/lib/db-columns";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "@/lib/router-compat";
+import { Link, useLocation } from "@/lib/router-compat";
 import { Search, MapPin, Clock, ThumbsUp, MoreHorizontal, Trash2, Droplets, AlertTriangle, ShieldAlert, Flame, Lightbulb, Pipette, Building, Volume2, Camera, ExternalLink } from "lucide-react";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 import CommentThread from "@/components/CommentThread";
@@ -10,6 +10,7 @@ import SocialShare from "@/components/SocialShare";
 import SatisfactionRating from "@/components/SatisfactionRating";
 import SLACountdown from "@/components/SLACountdown";
 import SentimentBadge from "@/components/SentimentBadge";
+import StatusChip from "@/components/StatusChip";
 import VerifyButton from "@/components/VerifyButton";
 import ExportButtons from "@/components/ExportButtons";
 import { lazy, Suspense } from "react";
@@ -44,7 +45,9 @@ const Complaints = () => {
   });
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  
+  // "My complaints" view (bottom bar) — /complaints?mine=1
+  const routerLocation = useLocation();
+  const mineOnly = new URLSearchParams(routerLocation.search).get("mine") === "1";
 
   const { data: myProfile } = useQuery({
     queryKey: ["my-profile-header", user?.id],
@@ -67,9 +70,15 @@ const Complaints = () => {
   }, [invalidateComplaints]);
 
   const { data: complaints = [] } = useQuery({
-    queryKey: ["all-complaints", categoryFilter, statusFilter, cityFilter, wardFilter],
+    queryKey: ["all-complaints", categoryFilter, statusFilter, cityFilter, wardFilter, mineOnly && user ? user.id : null],
     queryFn: async () => {
       let query = supabase.from("complaints").select(COMPLAINT_COLS).order("created_at", { ascending: false });
+      if (mineOnly && user) {
+        const { data: ids } = await supabase.rpc("my_complaint_ids");
+        const idList = ((ids ?? []) as unknown as string[]).filter(Boolean);
+        if (idList.length === 0) return [];
+        query = query.in("id", idList);
+      }
       if (categoryFilter !== "all") query = query.eq("category", categoryFilter);
       if (statusFilter !== "all") query = query.eq("status", statusFilter);
       if (cityFilter !== "all") query = query.eq("city", cityFilter);
@@ -115,11 +124,30 @@ const Complaints = () => {
     <Layout>
       <div className="container py-8 md:py-12">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">{t("complaints.title")}</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground">
+            {mineOnly && user ? (language === "hi" ? "मेरी शिकायतें" : "My complaints") : t("complaints.title")}
+          </h1>
           <ExportButtons data={exportData} filename="complaints-export" title={tx("NagarNazar - Complaints Report")} />
         </div>
         <div className="flex items-center gap-2 flex-wrap mb-6">
           <p className="text-muted-foreground">{t("complaints.subtitle")}</p>
+          {user && (
+            <div role="group" aria-label={language === "hi" ? "दिखाएं" : "Show"} className="inline-flex rounded-full bg-muted p-1">
+              {[
+                { v: false, en: "All", hi: "सभी" },
+                { v: true, en: "Mine", hi: "मेरी" },
+              ].map((o) => (
+                <Link
+                  key={String(o.v)}
+                  to={o.v ? "/complaints?mine=1" : "/complaints"}
+                  aria-current={mineOnly === o.v ? "page" : undefined}
+                  className={`inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold ${mineOnly === o.v ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+                >
+                  {language === "hi" ? o.hi : o.en}
+                </Link>
+              ))}
+            </div>
+          )}
           {user && myProfile?.home_city && (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
               <MapPin className="w-3 h-3" /> {tx(" Routed to ")}{myProfile.home_city}
@@ -130,22 +158,22 @@ const Complaints = () => {
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("complaints.search")} className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("complaints.search")} className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-full border border-input bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} className="rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+          <select aria-label={t("complaints.allCategories")} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as any)} className="min-h-11 rounded-full border border-input bg-card px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="all">{t("complaints.allCategories")}</option>
             {Object.entries(CATEGORY_CONFIG).map(([k, v]) => <option key={k} value={k}>{tx(v.label)}</option>)}
           </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+          <select aria-label={t("complaints.allStatuses")} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="min-h-11 rounded-full border border-input bg-card px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="all">{t("complaints.allStatuses")}</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{tx(v.label)}</option>)}
           </select>
-          <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+          <select aria-label={tx("All cities")} value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="min-h-11 rounded-full border border-input bg-card px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="all">{tx("All cities")}</option>
             {CITIES.map((c) => <option key={c} value={c}>{tx(c)}</option>)}
           </select>
           {cityFilter !== "all" && wardList.length > 0 && (
-            <select value={wardFilter} onChange={(e) => setWardFilter(e.target.value)} aria-label={tx("Ward")} className="rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={wardFilter} onChange={(e) => setWardFilter(e.target.value)} aria-label={tx("Ward")} className="min-h-11 rounded-full border border-input bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="all">{tx("All wards")}</option>
               {wardList.map((w) => <option key={w.id} value={w.id}>{tx("Ward ")}{w.ward_number} · {tx(w.name)} ({tx(w.zone)})</option>)}
             </select>
@@ -157,11 +185,10 @@ const Complaints = () => {
         <div className="grid gap-4">
           {filtered.map((c: any, i: number) => {
             const catConfig = CATEGORY_CONFIG[c.category as ComplaintCategory];
-            const statusConfig = STATUS_CONFIG[c.status as keyof typeof STATUS_CONFIG];
             const Icon = ICON_MAP[catConfig?.icon] || MoreHorizontal;
             const deptName = getDeptName(c.department_id);
             return (
-              <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: cappedStagger(i) }} className="bg-card rounded-xl border border-border p-4 md:p-5 shadow-card">
+              <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: cappedStagger(i) }} className="bg-card rounded-2xl border border-border/70 p-4 md:p-5 shadow-card">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: (catConfig?.color || "") + "18" }}>
                     <Icon className="w-5 h-5" style={{ color: catConfig?.color }} />
@@ -169,7 +196,7 @@ const Complaints = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-xs font-mono text-muted-foreground">#{c.complaint_id}</span>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: (statusConfig?.color || "") + "18", color: statusConfig?.color }}>{tx(statusConfig?.label)}</span>
+                      <StatusChip status={c.status} dueAt={c.due_at} />
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{tx(catConfig?.label)}</span>
                       {(c.priority === "high" || c.priority === "emergency") && (
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">

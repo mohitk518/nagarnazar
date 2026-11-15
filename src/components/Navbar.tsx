@@ -1,20 +1,25 @@
 import { useUiText } from "@/hooks/useUiText";
 import { useState } from "react";
 import { Link, useLocation } from "@/lib/router-compat";
-import { Menu, X, MapPin, LogIn, LogOut, User, Shield, Globe, Bot } from "lucide-react";
+import { Menu, X, LogOut, User, Shield, Globe, Plus, BarChart3, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import NotificationBell from "@/components/NotificationBell";
+import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 import type { TranslationKey } from "@/lib/translations";
 
-const NAV_LINKS: { to: string; labelKey: TranslationKey }[] = [
+const PRIMARY_LINKS: { to: string; labelKey: TranslationKey }[] = [
   { to: "/", labelKey: "nav.home" },
   { to: "/complaints", labelKey: "nav.complaints" },
   { to: "/map", labelKey: "nav.map" },
   { to: "/dashboard", labelKey: "nav.dashboard" },
   { to: "/leaderboard", labelKey: "nav.leaderboard" },
+];
+
+const MORE_LINKS: { to: string; labelKey: TranslationKey }[] = [
   { to: "/how-it-works", labelKey: "nav.howItWorks" },
   { to: "/faq", labelKey: "nav.faq" },
   { to: "/contact", labelKey: "nav.contact" },
@@ -28,235 +33,185 @@ const NAV_LINKS: { to: string; labelKey: TranslationKey }[] = [
   { to: "/worker", labelKey: "nav.worker" as TranslationKey },
 ];
 
+const pill = (active: boolean) =>
+  `inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm font-semibold transition-colors ${
+    active
+      ? "bg-primary text-primary-foreground"
+      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+  }`;
+
+const menuItem = (active: boolean) =>
+  `flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors ${
+    active ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent"
+  }`;
+
 const Navbar = () => {
   const tx = useUiText();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const { isAdmin } = useUserRole();
+  const hi = language === "hi";
+  const toggleLanguage = () => setLanguage(hi ? "en" : "hi");
+  const close = () => setMenuOpen(false);
 
-  const toggleLanguage = () => setLanguage(language === "en" ? "hi" : "en");
+  const LangButton = (
+    <button
+      type="button"
+      onClick={toggleLanguage}
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-primary/20 px-3 text-xs font-bold text-primary hover:border-primary hover:bg-accent"
+      aria-label={hi ? "Switch to English" : "हिन्दी में बदलें"}
+    >
+      <Globe className="h-4 w-4" aria-hidden="true" />
+      {hi ? "EN" : "हिन्दी"}
+    </button>
+  );
 
   return (
-    <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
-      <div className="container flex items-center justify-between gap-3 h-16">
-        <Link to="/" className="flex shrink-0 items-center gap-2">
-          <div className="w-9 h-9 shrink-0 rounded-lg gradient-hero flex items-center justify-center">
-            <MapPin className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col leading-tight whitespace-nowrap">
-            <span className="font-display font-bold text-foreground text-base tracking-tight">
-              {t("nav.appName")}
-            </span>
-            <span className="text-[10px] text-muted-foreground font-medium tracking-wide">
-              {language === "hi" ? "आपका शहर, आपकी नज़र" : "Your city, under watch"}
-            </span>
-          </div>
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-lg">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[60] focus:rounded-full focus:bg-secondary focus:px-4 focus:py-2 focus:text-secondary-foreground"
+      >
+        {hi ? "मुख्य सामग्री पर जाएं" : "Skip to content"}
+      </a>
+      <div className="container flex h-16 items-center justify-between gap-3">
+        <Link
+          to="/"
+          className="shrink-0 rounded-xl"
+          aria-label={hi ? "नगर नज़र — होम" : "NagarNazar — home"}
+        >
+          <Logo />
         </Link>
 
-        <nav className="hidden xl:flex min-w-0 flex-1 items-center justify-center gap-0.5">
-          {NAV_LINKS.slice(0, 5).map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`shrink-0 whitespace-nowrap px-2.5 py-2 rounded-md text-sm font-medium transition-colors ${
-                location.pathname === link.to
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {t(link.labelKey)}{link.to === "/departments" && <span className="ml-1 text-[10px] opacity-70">· {t("dept.inProgress")}</span>}
+        <nav
+          aria-label={hi ? "मुख्य" : "Main"}
+          className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex"
+        >
+          {PRIMARY_LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className={pill(location.pathname === link.to)}>
+              {t(link.labelKey)}
             </Link>
           ))}
-          {!isAdmin && (
-            <Link
-              to="/request-admin"
-              className={`shrink-0 whitespace-nowrap px-2.5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                location.pathname === "/request-admin"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              <Shield className="w-4 h-4" /> {t("nav.requestAdmin")}
-            </Link>
-          )}
           {isAdmin && (
             <>
-              <Link
-                to="/admin"
-                className={`shrink-0 whitespace-nowrap px-2.5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                  location.pathname === "/admin"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                <Shield className="w-4 h-4" /> {t("nav.admin")}
+              <Link to="/admin" className={pill(location.pathname === "/admin")}>
+                <Shield className="h-4 w-4" aria-hidden="true" /> {t("nav.admin")}
               </Link>
-              <Link
-                to="/reports"
-                className={`shrink-0 whitespace-nowrap px-2.5 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                  location.pathname === "/reports"
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {tx(" 📊 Reports ")}</Link>
+              <Link to="/reports" className={pill(location.pathname === "/reports")}>
+                <BarChart3 className="h-4 w-4" aria-hidden="true" /> {tx("Reports")}
+              </Link>
             </>
           )}
-
         </nav>
 
-        <div className="hidden xl:flex shrink-0 items-center gap-1">
-          {/* Language Toggle */}
-          <button
-            onClick={toggleLanguage}
-            className="group relative shrink-0 ml-1 px-3 py-1.5 rounded-full text-xs font-bold border-2 border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 hover:border-primary/60 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md overflow-hidden"
-            title={tx("Switch language")} aria-label={tx("Switch language")}
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Link
+            to="/report"
+            className="hidden min-h-11 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-bold text-secondary-foreground shadow-sm transition hover:brightness-105 active:scale-[0.97] md:inline-flex"
           >
-            <Globe className="w-3.5 h-3.5 text-primary group-hover:rotate-180 transition-transform duration-500" />
-            <span className="relative z-10 text-primary font-extrabold">
-              {language === "en" ? "हिन्दी" : "EN"}
-            </span>
-            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/5 to-accent/5 group-hover:from-primary/10 group-hover:to-accent/10 transition-all duration-300" />
-          </button>
-
+            <Plus className="h-4 w-4" aria-hidden="true" />{" "}
+            {hi ? "समस्या बताएं" : "Report a problem"}
+          </Link>
+          <div className="hidden sm:block">{LangButton}</div>
           <NotificationBell />
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-expanded={mobileOpen}
-            className="shrink-0 whitespace-nowrap px-2.5 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-1"
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            aria-controls="nn-menu"
+            aria-label={
+              menuOpen ? (hi ? "मेन्यू बंद करें" : "Close menu") : hi ? "और विकल्प" : "More options"
+            }
+            className="grid h-11 w-11 place-items-center rounded-full text-foreground hover:bg-accent"
           >
-            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />} {language === "hi" ? "और" : "More"}
-          </button>
-          {user ? (
-            <div className="flex shrink-0 items-center gap-2 ml-1">
-              <Link to="/profile" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted" title={tx("My Profile")} aria-label={tx("My Profile")}>
-                <User className="w-4 h-4" />
-              </Link>
-              <button onClick={signOut} className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted" title={t("nav.signOut")} aria-label={t("nav.signOut")}>
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <Link
-              to="/auth"
-              className="ml-1 shrink-0 whitespace-nowrap px-4 py-2 rounded-lg gradient-accent text-accent-foreground text-sm font-semibold"
-            >
-              {t("nav.signIn")}
-            </Link>
-          )}
-        </div>
-
-        <div className="xl:hidden flex items-center gap-1">
-          {/* Mobile language toggle */}
-          <button aria-label={language === "en" ? "Switch to Hindi" : "अंग्रेज़ी में बदलें"}
-            onClick={toggleLanguage}
-            className="group relative px-3 py-1.5 rounded-full text-xs font-bold border-2 border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 hover:border-primary/60 transition-all duration-300 flex items-center gap-1.5 shadow-sm hover:shadow-md overflow-hidden"
-          >
-            <Globe className="w-3.5 h-3.5 text-primary group-hover:rotate-180 transition-transform duration-500" />
-            <span className="relative z-10 text-primary font-extrabold">
-              {language === "en" ? "हिन्दी" : "EN"}
-            </span>
-            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/5 to-accent/5 group-hover:from-primary/10 group-hover:to-accent/10 transition-all duration-300" />
-          </button>
-          <NotificationBell />
-          <button
-            className="min-h-11 min-w-11 grid place-items-center rounded-md text-foreground hover:bg-muted"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={tx("Toggle menu")}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
       <AnimatePresence>
-        {mobileOpen && (
+        {menuOpen && (
           <motion.nav
+            id="nn-menu"
+            aria-label={hi ? "सभी पेज" : "All pages"}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18 }}
             className="overflow-hidden border-t border-border bg-card"
           >
-            <div className="container py-3 grid gap-1 sm:grid-cols-2 xl:grid-cols-4 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
-              {NAV_LINKS.map((link) => (
+            <div className="container grid max-h-[calc(100dvh-4rem)] gap-1 overflow-y-auto overscroll-contain py-3 pb-24 sm:grid-cols-2 md:pb-3 lg:grid-cols-4">
+              <div className="mb-1 sm:hidden">{LangButton}</div>
+              {[...PRIMARY_LINKS, ...MORE_LINKS].map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === link.to
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
+                  onClick={close}
+                  className={menuItem(location.pathname === link.to)}
                 >
-                  {t(link.labelKey)}{link.to === "/departments" && <span className="ml-1 text-[10px] opacity-70">· {t("dept.inProgress")}</span>}
+                  {t(link.labelKey)}
                 </Link>
               ))}
-              {!isAdmin && (
-                <Link
-                  to="/request-admin"
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    location.pathname === "/request-admin"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <Shield className="w-4 h-4" /> {t("nav.requestAdmin")}
-                </Link>
-              )}
-              {isAdmin && (
+              <Link
+                to="/privacy"
+                onClick={close}
+                className={menuItem(location.pathname === "/privacy")}
+              >
+                <Lock className="h-4 w-4" aria-hidden="true" /> {hi ? "गोपनीयता" : "Privacy"}
+              </Link>
+              {isAdmin ? (
                 <>
                   <Link
                     to="/admin"
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                      location.pathname === "/admin"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    onClick={close}
+                    className={menuItem(location.pathname === "/admin")}
                   >
-                    <Shield className="w-4 h-4" /> {t("nav.admin")}
+                    <Shield className="h-4 w-4" aria-hidden="true" /> {t("nav.admin")}
                   </Link>
                   <Link
                     to="/reports"
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                      location.pathname === "/reports"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    onClick={close}
+                    className={menuItem(location.pathname === "/reports")}
                   >
-                    {tx(" 📊 Reports ")}</Link>
+                    <BarChart3 className="h-4 w-4" aria-hidden="true" /> {tx("Reports")}
+                  </Link>
                 </>
+              ) : (
+                <Link
+                  to="/request-admin"
+                  onClick={close}
+                  className={menuItem(location.pathname === "/request-admin")}
+                >
+                  <Shield className="h-4 w-4" aria-hidden="true" /> {t("nav.requestAdmin")}
+                </Link>
               )}
               {user ? (
                 <>
                   <Link
                     to="/profile"
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-3 py-2.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                      location.pathname === "/profile"
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
+                    onClick={close}
+                    className={menuItem(location.pathname === "/profile")}
                   >
-                    <User className="w-4 h-4" /> {tx(" My Profile ")}</Link>
+                    <User className="h-4 w-4" aria-hidden="true" /> {tx("My Profile")}
+                  </Link>
                   <button
-                    onClick={() => { signOut(); setMobileOpen(false); }}
-                    className="px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left flex items-center gap-2"
+                    type="button"
+                    onClick={() => {
+                      signOut();
+                      close();
+                    }}
+                    className={menuItem(false) + " text-left"}
                   >
-                    <LogOut className="w-4 h-4" /> {t("nav.signOut")}
+                    <LogOut className="h-4 w-4" aria-hidden="true" /> {t("nav.signOut")}
                   </button>
                 </>
               ) : (
                 <Link
                   to="/auth"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-3 py-2.5 rounded-md text-sm font-semibold gradient-accent text-accent-foreground text-center"
+                  onClick={close}
+                  className="flex min-h-11 items-center justify-center rounded-full bg-secondary px-4 text-sm font-bold text-secondary-foreground"
                 >
                   {t("nav.signIn")}
                 </Link>

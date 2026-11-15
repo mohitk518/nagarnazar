@@ -9,9 +9,10 @@ interface Props {
   onPick: (s: PlaceSuggestion) => void;
   placeholder?: string;
   required?: boolean;
+  id?: string;
 }
 
-const AddressAutocomplete = ({ value, onChange, onPick, placeholder, required }: Props) => {
+const AddressAutocomplete = ({ value, onChange, onPick, placeholder, required, id }: Props) => {
   const tx = useUiText();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,7 @@ const AddressAutocomplete = ({ value, onChange, onPick, placeholder, required }:
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
         <input
+          id={id}
           value={value}
           required={required}
           onChange={(e) => {
@@ -62,7 +64,7 @@ const AddressAutocomplete = ({ value, onChange, onPick, placeholder, required }:
           }}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
           placeholder={placeholder || tx("Search address or area...")}
-          className="w-full rounded-lg border border-input bg-card pl-9 pr-9 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-2xl border border-input bg-card pl-9 pr-9 py-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {loading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />

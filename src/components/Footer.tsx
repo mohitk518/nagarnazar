@@ -1,6 +1,6 @@
 import { useUiText } from "@/hooks/useUiText";
 import { Link } from "@/lib/router-compat";
-import { MapPin } from "lucide-react";
+import { LogoMark } from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
@@ -8,14 +8,14 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-primary text-primary-foreground mt-auto">
+    <footer className="mt-auto rounded-t-[2rem] bg-[#1E1B4B] text-white dark:bg-[#15123a]">
       <div className="container py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-secondary-foreground" />
-              </div>
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white">
+                <LogoMark className="h-9 w-9" />
+              </span>
               <span className="font-display font-bold text-lg">{t("nav.appName")}</span>
             </div>
             <p className="text-sm opacity-80 leading-relaxed">{t("footer.desc")}</p>
@@ -36,6 +36,7 @@ const Footer = () => {
               <Link to="/contact" className="hover:opacity-100 transition-opacity">{t("nav.contact")}</Link>
               <Link to="/faq" className="hover:opacity-100 transition-opacity">{t("nav.faq")}</Link>
               <Link to="/privacy" className="hover:opacity-100 transition-opacity">{tx("Privacy / गोपनीयता")}</Link>
+              <Link to="/install" className="hover:opacity-100 transition-opacity">{t("nav.install")}</Link>
             </div>
           </div>
         </div>

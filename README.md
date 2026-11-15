@@ -46,6 +46,7 @@ Target users: citizens, municipal officers / city admins and field workers in sm
 Everything below was built between 15 and 24 November 2026; the commit dates on GitHub are the record. Everything else in this README was **pre-existing** in the earlier Civic Tracker project (see [Project history & credits](#project-history--credits)).
 
 - **Rebrand to NagarNazar** — new name, Hindi name, tagline, PWA manifest, meta tags, poster/share text and footer in both languages; old competition material removed.
+- **New UI/UX** — new design system (indigo `#1E1B4B`, saffron `#F59E0B`, green/red status colours, Poppins/Inter + Mukta for Hindi), original eye-and-pin logo and app icons, pill buttons with 44px+ touch targets, rounded cards and colour-coded status chips (Pending / In progress / Resolved / Overdue), a fixed mobile bottom bar (Home · Map · **+ Report** · My complaints · Profile), a new home page whose live stats (total, resolved, average time to fix) come from real data, a new step-by-step report flow (Photo → Location/ward → Details → Review) with a progress bar on its own `/report` page, a "My complaints" view, a skip link, visible keyboard focus and an optional dark mode. Checked with axe-core (WCAG 2.1 AA rules): 0 violations on 10 pages at mobile and desktop widths.
 
 ## Tech stack
 

@@ -6,9 +6,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "NagarNazar" },
-      { name: "description", content: "Report & track civic issues in City" },
+      { name: "description", content: "Your city, under watch. Every complaint tracked, every fix proven." },
       { property: "og:title", content: "NagarNazar" },
-      { property: "og:description", content: "Report & track civic issues in City" },
+      { property: "og:description", content: "Your city, under watch. Every complaint tracked, every fix proven." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

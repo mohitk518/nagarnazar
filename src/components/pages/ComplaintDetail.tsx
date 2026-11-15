@@ -19,6 +19,7 @@ import ComplaintAssignmentPanel from "@/components/ComplaintAssignmentPanel";
 import DuplicateMergePanel from "@/components/DuplicateMergePanel";
 import { ESCALATION_LABEL } from "@/lib/accountability";
 import { CATEGORY_CONFIG, STATUS_CONFIG, ComplaintCategory } from "@/lib/types";
+import StatusChip from "@/components/StatusChip";
 import { supabase } from "@/integrations/supabase/client";
 import { COMPLAINT_COLS, DEPARTMENT_COLS_PUBLIC } from "@/lib/db-columns";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -119,7 +120,6 @@ const ComplaintDetail = () => {
   }
 
   const catConfig = CATEGORY_CONFIG[complaint.category as ComplaintCategory];
-  const statusConfig = STATUS_CONFIG[complaint.status as keyof typeof STATUS_CONFIG];
 
   const formatDate = (s: string) =>
     new Date(s).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -127,7 +127,7 @@ const ComplaintDetail = () => {
   return (
     <Layout>
       <div className="container py-8 md:py-12 max-w-4xl">
-        <Link to="/complaints" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link to="/complaints" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground mb-2">
           <ArrowLeft className="w-4 h-4" /> {tx(" Back to complaints ")}</Link>
 
         <motion.div
@@ -137,12 +137,7 @@ const ComplaintDetail = () => {
         >
           <div className="flex items-center gap-2 flex-wrap mb-3">
             <span className="text-xs font-mono text-muted-foreground">#{complaint.complaint_id}</span>
-            <span
-              className="text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: (statusConfig?.color || "") + "22", color: statusConfig?.color }}
-            >
-              {tx(statusConfig?.label)}
-            </span>
+            <StatusChip status={complaint.status} dueAt={(complaint as { due_at?: string | null }).due_at} />
             <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground font-medium">
               {tx(catConfig?.label)}
             </span>
@@ -183,7 +178,7 @@ const ComplaintDetail = () => {
             </p>
           )}
 
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">{complaint.title}</h1>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground mb-2">{complaint.title}</h1>
 
           {complaint.ai_summary && (
             <p className="text-sm mb-3 px-3 py-2 rounded-lg bg-primary/5 border border-primary/10 text-foreground/80 italic flex items-start gap-2">

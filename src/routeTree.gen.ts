@@ -26,6 +26,7 @@ import { Route as PollsRouteImport } from './routes/polls'
 import { Route as PredictionsRouteImport } from './routes/predictions'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as RequestAdminRouteImport } from './routes/request-admin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -139,6 +140,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -312,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/request-admin': typeof RequestAdminRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -360,6 +367,7 @@ export interface FileRoutesByTo {
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/request-admin': typeof RequestAdminRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -409,6 +417,7 @@ export interface FileRoutesById {
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/report': typeof ReportRoute
   '/reports': typeof ReportsRoute
   '/request-admin': typeof RequestAdminRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
     | '/predictions'
     | '/privacy'
     | '/profile'
+    | '/report'
     | '/reports'
     | '/request-admin'
     | '/reset-password'
@@ -507,6 +517,7 @@ export interface FileRouteTypes {
     | '/predictions'
     | '/privacy'
     | '/profile'
+    | '/report'
     | '/reports'
     | '/request-admin'
     | '/reset-password'
@@ -555,6 +566,7 @@ export interface FileRouteTypes {
     | '/predictions'
     | '/privacy'
     | '/profile'
+    | '/report'
     | '/reports'
     | '/request-admin'
     | '/reset-password'
@@ -604,6 +616,7 @@ export interface RootRouteChildren {
   PredictionsRoute: typeof PredictionsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRoute
   RequestAdminRoute: typeof RequestAdminRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -754,6 +767,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -980,6 +1000,7 @@ const rootRouteChildren: RootRouteChildren = {
   PredictionsRoute: PredictionsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  ReportRoute: ReportRoute,
   ReportsRoute: ReportsRoute,
   RequestAdminRoute: RequestAdminRoute,
   ResetPasswordRoute: ResetPasswordRoute,
