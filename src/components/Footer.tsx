@@ -22,34 +22,55 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold mb-3">{t("footer.quickLinks")}</h4>
+            <h2 className="font-display text-base font-semibold mb-3">{t("footer.quickLinks")}</h2>
             <div className="flex flex-col gap-2 text-sm opacity-80">
-              <Link to="/" className="hover:opacity-100 transition-opacity">{t("nav.home")}</Link>
-              <Link to="/complaints" className="hover:opacity-100 transition-opacity">{t("nav.complaints")}</Link>
-              <Link to="/dashboard" className="hover:opacity-100 transition-opacity">{t("nav.dashboard")}</Link>
+              <Link to="/" className="hover:opacity-100 transition-opacity">
+                {t("nav.home")}
+              </Link>
+              <Link to="/complaints" className="hover:opacity-100 transition-opacity">
+                {t("nav.complaints")}
+              </Link>
+              <Link to="/dashboard" className="hover:opacity-100 transition-opacity">
+                {t("nav.dashboard")}
+              </Link>
             </div>
           </div>
 
           <div>
-            <h4 className="font-display font-semibold mb-3">{t("footer.getInTouch")}</h4>
+            <h2 className="font-display text-base font-semibold mb-3">{t("footer.getInTouch")}</h2>
             <div className="flex flex-col gap-2 text-sm opacity-80">
-              <Link to="/contact" className="hover:opacity-100 transition-opacity">{t("nav.contact")}</Link>
-              <Link to="/faq" className="hover:opacity-100 transition-opacity">{t("nav.faq")}</Link>
-              <Link to="/privacy" className="hover:opacity-100 transition-opacity">{tx("Privacy / गोपनीयता")}</Link>
-              <Link to="/install" className="hover:opacity-100 transition-opacity">{t("nav.install")}</Link>
+              <Link to="/contact" className="hover:opacity-100 transition-opacity">
+                {t("nav.contact")}
+              </Link>
+              <Link to="/faq" className="hover:opacity-100 transition-opacity">
+                {t("nav.faq")}
+              </Link>
+              <Link to="/privacy" className="hover:opacity-100 transition-opacity">
+                {tx("Privacy / गोपनीयता")}
+              </Link>
+              <Link to="/install" className="hover:opacity-100 transition-opacity">
+                {t("nav.install")}
+              </Link>
             </div>
           </div>
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-6 text-sm opacity-80">
-          <h4 className="font-display font-semibold mb-2 text-center">{t("footer.problemStatement")}</h4>
+          <h2 className="font-display text-base font-semibold mb-2 text-center">
+            {t("footer.problemStatement")}
+          </h2>
           <p className="leading-relaxed max-w-3xl mx-auto text-center">{t("footer.problemDesc")}</p>
         </div>
         <div className="mt-6 flex flex-col items-center gap-1 text-xs opacity-80 text-center">
           <p>{t("brand.tagline")}</p>
           <p>
             {t("footer.builtFor")} · Team SANT ·{" "}
-            <a href="https://github.com/mohitk518/nagarnazar" target="_blank" rel="noopener noreferrer" className="underline">
+            <a
+              href="https://github.com/mohitk518/nagarnazar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
               GitHub
             </a>
           </p>

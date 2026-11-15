@@ -43,7 +43,7 @@ export default function Logo({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <LogoMark className="h-10 w-10 shrink-0" />
+      <LogoMark className="h-10 w-10 shrink-0" title={compact ? "NagarNazar" : ""} />
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="font-display text-lg font-extrabold tracking-tight text-foreground">

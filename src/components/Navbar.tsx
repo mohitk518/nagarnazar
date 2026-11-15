@@ -77,11 +77,7 @@ const Navbar = () => {
         {hi ? "मुख्य सामग्री पर जाएं" : "Skip to content"}
       </a>
       <div className="container flex h-16 items-center justify-between gap-3">
-        <Link
-          to="/"
-          className="shrink-0 rounded-xl"
-          aria-label={hi ? "नगर नज़र — होम" : "NagarNazar — home"}
-        >
+        <Link to="/" className="shrink-0 rounded-xl" title={hi ? "होम" : "Home"}>
           <Logo />
         </Link>
 

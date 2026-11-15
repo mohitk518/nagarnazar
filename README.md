@@ -52,6 +52,22 @@ Everything below was built between 15 and 24 November 2026; the commit dates on 
 - **Privacy controls (feature 3)** — "Delete my account" on the Profile page and on `/privacy`, with **two confirmations** (a dialog that lists exactly what happens, then typing DELETE / हटाएं). Deletion runs in a server function with the service-role key kept on the server: complaints are first anonymised ("Deleted user", WhatsApp number removed, unlinked from the account) — if that fails nothing is deleted — then the profile (incl. phone), comments, votes, ratings, notifications, roles and other personal rows are removed, then the login. The deletion steps live in `src/lib/account-deletion.ts` with unit tests. A rewritten bilingual `/privacy` page answers: what data, why, how long, who sees it, how to delete, contact. Privacy links in the footer, the menu and the sign-up form. *Pre-existing:* a first version of the privacy page and a one-step "type DELETE" account deletion that cleared fewer tables and ignored errors.
 - **Reliable AI (feature 4)** — every Gemini call now goes through one server wrapper (`src/lib/ai-gateway.server.ts`, 13 s timeout → HTTP 504) and one browser wrapper (`src/lib/invoke-function.ts`: ~15 s per attempt, 2 retries with exponential backoff 1 s → 2 s, never throws). The streamed chat assistant uses the same rules (`fetchAiStream`). Voice speech-to-text gets a longer budget because voice notes have no length limit. If the AI summary fails, the complaint is still saved with the citizen's own category, the citizen sees **"AI analysis will happen later / AI विश्लेषण बाद में होगा"**, and the app retries in the background (on start, when back online and every 5 minutes, up to 24 h; the server now allows the reporter to request a missing summary for 24 h instead of 15 min). *Pre-existing:* a browser wrapper with a 20 s timeout and 2 retries, and non-blocking AI category suggestions.
 
+## Testing (Round 2)
+
+| Check | Result | How |
+|---|---|---|
+| Unit tests (Vitest) | **79 passing** (44 before the hackathon) | `bun run test` — new tests cover ward insert fallback and ward summary, IndexedDB drafts and the manifest, account-deletion order, AI timeout/retry/"later" queue, live stats and the overdue chip |
+| Type check / build | pass | `tsc --noEmit`, `bun run build` |
+| Accessibility (axe-core 4, WCAG 2.1 A/AA rules) | **0 violations** on 10 pages, mobile 390 px and desktop 1366 px, light and dark | headless Chrome on a local build |
+| Lighthouse 12 (mobile) | **Accessibility 100, SEO 100** on `/`, `/report`, `/privacy`, `/complaints`; Performance 62–76 and Best practices 76 | local production build over plain HTTP with a dummy backend, so Performance/Best-practices are not representative of the live site |
+| Offline / PWA, end to end | pass | Chrome on a local production build: service worker activated; offline reload opened the cached `/report` with the offline banner; a 2.96 MB photo draft came back from IndexedDB; "Send draft?" appeared on reconnect (report page and home page) |
+
+Not done in this round: the end-to-end scripts in `scripts/` (they need server keys and the shared live database, so they were not run), and there are no Playwright tests in this repository.
+
+### One-time setup for this deployment
+
+Apply `supabase/migrations/20261116120000_reported_ward.sql` (adds the nullable `complaints.reported_ward` column). Until it is applied the app works normally; only the ward the citizen typed/chose is not stored.
+
 ## Tech stack
 
 | Layer | Technology |
