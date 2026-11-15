@@ -3,7 +3,7 @@ import { useUiText } from "@/hooks/useUiText";
 import WardPreview from "@/components/WardPreview";
 import { photoUrlFor } from "@/lib/photo-url";
 import { invokeFunction } from "@/lib/invoke-function";
-import { useState, useRef, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera,
@@ -52,7 +52,14 @@ import {
   pushRecentLocation,
   type RecentLocation,
 } from "@/lib/recent-locations";
-import { loadDraft, saveDraft, clearDraft, fileToDataUrl, dataUrlToFile } from "@/lib/draft";
+import {
+  loadDraft,
+  saveDraft,
+  clearDraft,
+  fileToDataUrl,
+  blobToFile,
+  hasContent,
+} from "@/lib/draft";
 import { useCityWards, wardLabel, insertComplaintWithWard } from "@/lib/wards";
 
 const LocationMapPicker = lazy(() => import("@/components/LocationMapPicker"));
@@ -87,70 +94,32 @@ export default function ReportFlow() {
   const hi = language === "hi";
   const navigate = useNavigate();
 
-  // Restore draft on mount (one-shot)
-  const initialDraft = useMemo(() => loadDraft() || {}, []);
-
   const [step, setStep] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<ComplaintCategory | "">(
-    (initialDraft.category as ComplaintCategory) || "",
-  );
-  const [title, setTitle] = useState(initialDraft.title || "");
-  const [description, setDescription] = useState(initialDraft.description || "");
-  const [location, setLocation] = useState(initialDraft.location || "");
-  const [manualLat, setManualLat] = useState(initialDraft.manualLat || "");
-  const [manualLng, setManualLng] = useState(initialDraft.manualLng || "");
+  const [selectedCategory, setSelectedCategory] = useState<ComplaintCategory | "">("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [manualLat, setManualLat] = useState("");
+  const [manualLng, setManualLng] = useState("");
   const [detectedLat, setDetectedLat] = useState<number | null>(null);
   const [detectedLng, setDetectedLng] = useState<number | null>(null);
-  const [priority, setPriority] = useState<string>(initialDraft.priority || "medium");
+  const [priority, setPriority] = useState<string>("medium");
   const [city, setCity] = useState<string>(() => localStorage.getItem("ct_city") || DEFAULT_CITY);
   const [cityFromProfile, setCityFromProfile] = useState(false);
-  const [anonymous, setAnonymous] = useState(initialDraft.anonymous ?? false);
-  const [reportedWard, setReportedWard] = useState<string>(initialDraft.ward || "");
+  const [anonymous, setAnonymous] = useState(false);
+  const [reportedWard, setReportedWard] = useState<string>("");
   const { data: cityWards = [] } = useCityWards(city);
-  const [photo, setPhoto] = useState<File | null>(() => {
-    if (initialDraft.photoDataUrl && initialDraft.photoName && initialDraft.photoType) {
-      return dataUrlToFile(
-        initialDraft.photoDataUrl,
-        initialDraft.photoName,
-        initialDraft.photoType,
-      );
-    }
-    return null;
-  });
-  const [photoPreview, setPhotoPreview] = useState<string | null>(
-    initialDraft.photoDataUrl || null,
-  );
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(
-    initialDraft.photoDataUrl || null,
-  );
-  const [photoName, setPhotoName] = useState<string | null>(initialDraft.photoName || null);
-  const [photoType, setPhotoType] = useState<string | null>(initialDraft.photoType || null);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [syncState, setSyncState] = useState<"idle" | "queued" | "failed" | "sent">("idle");
   const [isOnline, setIsOnline] = useState(true);
-  const pendingSubmitRef = useRef(false);
+  const [showSendPrompt, setShowSendPrompt] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsOnline(navigator.onLine);
-    const on = () => {
-      setIsOnline(true);
-      if (pendingSubmitRef.current) {
-        pendingSubmitRef.current = false;
-        toast.info(tx("Back online — sending your saved complaint…"));
-        formRef.current?.requestSubmit();
-      }
-    };
-    const off = () => setIsOnline(false);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
-    return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", off);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const syncStateRef = useRef(syncState);
+  syncStateRef.current = syncState;
 
   const [submittedId, setSubmittedId] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -162,9 +131,7 @@ export default function ReportFlow() {
   const [detectedAddress, setDetectedAddress] = useState<string | null>(null);
   const [recentLocs, setRecentLocs] = useState<RecentLocation[]>(() => getRecentLocations());
   const [coordsCopied, setCoordsCopied] = useState(false);
-  const [draftRestored, setDraftRestored] = useState(
-    Boolean(initialDraft.title || initialDraft.description || initialDraft.photoDataUrl),
-  );
+  const [draftRestored, setDraftRestored] = useState(false);
   const [classifyingPhoto, setClassifyingPhoto] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<{
     category: ComplaintCategory | null;
@@ -175,10 +142,65 @@ export default function ReportFlow() {
     null,
   );
 
-  // Auto-save draft (debounced)
+  // Restore the draft saved on this device (IndexedDB), once.
   useEffect(() => {
+    let cancelled = false;
+    loadDraft().then((d) => {
+      if (cancelled) return;
+      if (d && hasContent(d)) {
+        setTitle(d.title || "");
+        setDescription(d.description || "");
+        setLocation(d.location || "");
+        setSelectedCategory((d.category as ComplaintCategory) || "");
+        setManualLat(d.manualLat || "");
+        setManualLng(d.manualLng || "");
+        setPriority(d.priority || "medium");
+        setAnonymous(Boolean(d.anonymous));
+        setReportedWard(d.ward || "");
+        if (d.city) setCity(d.city);
+        if (d.photo) {
+          const f = blobToFile(d.photo, d.photoName, d.photoType);
+          setPhoto(f);
+          setPhotoPreview(URL.createObjectURL(f));
+        }
+        setDraftRestored(true);
+        if (d.queued) {
+          setSyncState("queued");
+          setStep(STEPS.length - 1);
+          if (navigator.onLine) setShowSendPrompt(true);
+        }
+      }
+      setDraftLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Online / offline. When the network returns with a queued draft, ask before sending.
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+    const on = () => {
+      setIsOnline(true);
+      if (syncStateRef.current === "queued") setShowSendPrompt(true);
+    };
+    const off = () => {
+      setIsOnline(false);
+      setShowSendPrompt(false);
+    };
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
+
+  // Auto-save draft to the device (debounced). Waits until the saved draft has been restored.
+  useEffect(() => {
+    if (!draftLoaded) return;
     const timer = setTimeout(() => {
-      saveDraft({
+      void saveDraft({
         title,
         description,
         category: selectedCategory,
@@ -188,13 +210,16 @@ export default function ReportFlow() {
         manualLng,
         anonymous,
         ward: reportedWard,
-        photoDataUrl: photoDataUrl ?? undefined,
-        photoName: photoName ?? undefined,
-        photoType: photoType ?? undefined,
+        city,
+        photo,
+        photoName: photo?.name,
+        photoType: photo?.type,
+        queued: syncState === "queued",
       });
     }, 500);
     return () => clearTimeout(timer);
   }, [
+    draftLoaded,
     title,
     description,
     selectedCategory,
@@ -204,9 +229,9 @@ export default function ReportFlow() {
     manualLng,
     anonymous,
     reportedWard,
-    photoDataUrl,
-    photoName,
-    photoType,
+    city,
+    photo,
+    syncState,
   ]);
 
   // Load user's home city from profile
@@ -262,15 +287,7 @@ export default function ReportFlow() {
   const setPhotoFromFile = async (file: File) => {
     setPhoto(file);
     if (photoPreview && photoPreview.startsWith("blob:")) URL.revokeObjectURL(photoPreview);
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setPhotoPreview(dataUrl);
-      setPhotoDataUrl(dataUrl);
-      setPhotoName(file.name);
-      setPhotoType(file.type);
-    } catch {
-      setPhotoPreview(URL.createObjectURL(file));
-    }
+    setPhotoPreview(URL.createObjectURL(file));
   };
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,10 +300,8 @@ export default function ReportFlow() {
 
   const removePhoto = () => {
     setPhoto(null);
+    if (photoPreview && photoPreview.startsWith("blob:")) URL.revokeObjectURL(photoPreview);
     setPhotoPreview(null);
-    setPhotoDataUrl(null);
-    setPhotoName(null);
-    setPhotoType(null);
     setAiSuggestion(null);
   };
 
@@ -424,6 +439,11 @@ export default function ReportFlow() {
       if (stepValid[step]) goTo(step + 1);
       return;
     }
+    await doSubmit();
+  };
+
+  const doSubmit = async () => {
+    setShowSendPrompt(false);
     if (!user) {
       navigate("/auth");
       return;
@@ -461,7 +481,9 @@ export default function ReportFlow() {
         city,
         latitude: lat,
         longitude: lng,
-        submitted_by: anonymous ? "Anonymous" : user.user_metadata?.full_name || user.email || "Citizen",
+        submitted_by: anonymous
+          ? "Anonymous"
+          : user.user_metadata?.full_name || user.email || "Citizen",
       };
       const { data, error } = await insertComplaintWithWard<{ id: string; complaint_id: string }>(
         async (row) =>
@@ -511,7 +533,8 @@ export default function ReportFlow() {
       removePhoto();
       setDuplicateWarning(null);
       setDraftRestored(false);
-      clearDraft();
+      setShowSendPrompt(false);
+      void clearDraft();
       localStorage.setItem("ct_city", city);
       setStep(0);
     } catch (err) {
@@ -522,12 +545,11 @@ export default function ReportFlow() {
         err instanceof TypeError ||
         /fetch|network/i.test(String((err as Error)?.message ?? err));
       if (networkish) {
-        pendingSubmitRef.current = true;
         setSyncState("queued");
         toast.warning(
-          tx(
-            "You're offline. Your complaint is saved on this phone and will be sent automatically when you're back online.",
-          ),
+          hi
+            ? "आप ऑफ़लाइन हैं। शिकायत इस फ़ोन पर सेव है — नेट आते ही हम पूछेंगे कि भेजें या नहीं।"
+            : "You're offline. Your complaint is saved on this phone — we'll ask to send it when you're back online.",
         );
       } else {
         setSyncState("failed");
@@ -564,7 +586,9 @@ export default function ReportFlow() {
   };
 
   const discardDraft = () => {
-    clearDraft();
+    void clearDraft();
+    setSyncState("idle");
+    setShowSendPrompt(false);
     setTitle("");
     setDescription("");
     setLocation("");
@@ -755,16 +779,52 @@ export default function ReportFlow() {
         </motion.div>
       )}
 
-      {(!isOnline || syncState === "queued" || syncState === "failed") && (
+      {showSendPrompt && isOnline && syncState === "queued" && (
+        <div
+          role="alertdialog"
+          aria-labelledby="nn-send-title"
+          aria-describedby="nn-send-desc"
+          className="mb-4 rounded-2xl border-2 border-secondary bg-secondary/15 p-4"
+        >
+          <p id="nn-send-title" className="font-display text-lg font-extrabold text-foreground">
+            {hi ? "नेट वापस आ गया — ड्राफ़्ट भेजें?" : "You're back online — send your draft?"}
+          </p>
+          <p id="nn-send-desc" className="mt-1 text-sm text-foreground/80">
+            {hi
+              ? `“${title || "बिना शीर्षक"}” इस फ़ोन पर सेव है। भेजने से पहले नीचे जाँच लें।`
+              : `“${title || "Untitled"}” is saved on this phone. Check it below before sending.`}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void doSubmit()}
+              disabled={!stepValid[3] || submitting}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" aria-hidden="true" />
+              {hi ? "हाँ, भेजें" : "Yes, send it"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSendPrompt(false)}
+              className="inline-flex min-h-11 items-center rounded-full border-2 border-primary/25 px-5 text-sm font-bold text-primary"
+            >
+              {hi ? "बाद में" : "Later"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {(!isOnline || (syncState === "queued" && !showSendPrompt) || syncState === "failed") && (
         <div
           role="status"
           className="mb-4 rounded-2xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground"
         >
           {!isOnline ? tx("Offline — your draft is saved on this device. ") : ""}
           {syncState === "queued"
-            ? tx(
-                "Waiting to send: your complaint will upload automatically when the connection returns.",
-              )
+            ? hi
+              ? "भेजने के लिए तैयार: नेट आते ही हम पूछेंगे।"
+              : "Ready to send: we'll ask you as soon as the connection returns."
             : syncState === "failed"
               ? tx("Last attempt failed. Your draft is safe — tap Submit to retry.")
               : tx("You can keep filling the form.")}
@@ -1147,7 +1207,9 @@ export default function ReportFlow() {
                       onChange={(e) => setReportedWard(e.target.value)}
                       className={inputCls + " mt-2 min-h-11"}
                     >
-                      <option value="">{hi ? "पता नहीं — GPS से तय करें" : "Not sure — use GPS"}</option>
+                      <option value="">
+                        {hi ? "पता नहीं — GPS से तय करें" : "Not sure — use GPS"}
+                      </option>
                       {cityWards.map((w) => {
                         const label = wardLabel(w, hi);
                         return (
@@ -1162,7 +1224,9 @@ export default function ReportFlow() {
                       id="nn-ward"
                       inputMode="numeric"
                       value={reportedWard}
-                      onChange={(e) => setReportedWard(e.target.value.replace(/[^\d]/g, "").slice(0, 4))}
+                      onChange={(e) =>
+                        setReportedWard(e.target.value.replace(/[^\d]/g, "").slice(0, 4))
+                      }
                       placeholder={hi ? "वार्ड नंबर, जैसे 12" : "Ward number, e.g. 12"}
                       className={inputCls + " mt-2"}
                     />

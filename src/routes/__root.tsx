@@ -20,6 +20,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { useUiText } from "@/hooks/useUiText";
 import { Button } from "@/components/ui/button";
 import NotFound from "@/components/pages/NotFound";
+import { registerServiceWorker } from "@/lib/sw-register";
 
 function ErrorComponent(props: ErrorComponentProps) {
   return <LanguageProvider><LocalizedError {...props} /></LanguageProvider>;
@@ -135,6 +136,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
