@@ -12,9 +12,9 @@ import { WardImport, CityRouting, NeedsChecking } from "@/components/WardConfigT
 export const Route = createFileRoute("/admin/wards")({
   head: () => ({
     meta: [
-      { title: "Wards & Zones — Civic Tracker Admin" },
+      { title: "Wards & Zones — NagarNazar Admin" },
       { name: "description", content: "Configure municipal wards and zones per city." },
-      { property: "og:title", content: "Wards & Zones — Civic Tracker Admin" },
+      { property: "og:title", content: "Wards & Zones — NagarNazar Admin" },
       { property: "og:description", content: "Configure municipal wards and zones per city." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

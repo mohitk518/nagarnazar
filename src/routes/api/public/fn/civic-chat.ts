@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
       `#${c.complaint_id}: "${c.title}" | ${c.category} | ${c.status} | ${c.priority} priority | ${c.location} | ${c.upvotes} upvotes`
     ).join("\n") || "No complaints found.";
 
-    const systemPrompt = `You are "Civic AI", a helpful assistant for Civic Tracker — a citizen complaint management platform. You help users understand complaints, navigate the app, and learn about civic issues.
+    const systemPrompt = `You are "Civic AI", a helpful assistant for NagarNazar — a citizen complaint management platform. You help users understand complaints, navigate the app, and learn about civic issues.
 
 Current Database Stats:
 - Total complaints: ${totalCount || 0}

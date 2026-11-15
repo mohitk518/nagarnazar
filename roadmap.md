@@ -1,4 +1,4 @@
-# Civic Tracker roadmap
+# NagarNazar roadmap
 
 - [x] Authorized D1–D4 and profiles/assignments/notifications remediation, documented migration and rollback (shared Live database; no publishing).
 - [x] Sequential regression suites and protected-record integrity verification using temporary accounts only.

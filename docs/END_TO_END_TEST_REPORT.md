@@ -4,16 +4,16 @@
 |---|---|
 | Project | Civic Tracker — "Every Complaint Tracked. Every Fix Proven." |
 | Team | Team SANT (Lead: Mohit Katara, Member: Divyansh Mathur) |
-| Competition | Unstop CodeQuest 2026 |
+| Competition | pre-hackathon audit of the earlier Civic Tracker project |
 | Pilot city | Ratlam, Madhya Pradesh |
 | Test date | 5 November 2026, 11:05–11:56 UTC (16:35–17:26 IST) |
-| Site tested | Published site https://civictracker-s-m.lovable.app (live database) and the Lovable preview for unpublished fixes |
+| Site tested | Published site of the earlier Civic Tracker deployment (pre-hackathon) (live database) and the Lovable preview for unpublished fixes |
 | Browser | Chromium (Playwright, headless), 1280×800 desktop, 768×1024 tablet, 390×844 mobile |
 | Accounts | Three temporary DEMO accounts (citizen, City Admin for Ratlam, field worker). The real Super Admin account was **not** used. |
 
 ## 1. Rules source
 
-Official Unstop CodeQuest 2026 rulebook, PPT template, slide limit and video length were **not available** in this project. The only requirements source is the team's own brief (`CIVIC_TRACKER - AUTONOMOUS FULL PROJECT`, Part 12). That brief lists: working MVP, GitHub repository, README, live deployment (it names Vercel), screenshots, short demo video, installation instructions, migrations, environment documentation and test results. No other requirements were invented. Slide count, video length and file format limits are **unverified** — please check them against the official Unstop page before submitting.
+This is a pre-hackathon report from the earlier Civic Tracker project; the earlier competition rulebook, PPT template, slide limit and video length were **not available** at the time. The only requirements source is the team's own brief (`CIVIC_TRACKER - AUTONOMOUS FULL PROJECT`, Part 12). That brief lists: working MVP, GitHub repository, README, live deployment (it names Vercel), screenshots, short demo video, installation instructions, migrations, environment documentation and test results. No other requirements were invented. Slide count, video length and file format limits are **unverified** — please check them against the official Unstop page before submitting.
 
 ## 2. Safety measures used during testing
 

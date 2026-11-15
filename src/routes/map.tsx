@@ -7,9 +7,9 @@ export const Route = createFileRoute("/map")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Map — Civic Tracker" },
+      { title: "Map — NagarNazar" },
       { name: "description", content: "See every reported civic issue on a live map of City." },
-      { property: "og:title", content: "Map — Civic Tracker" },
+      { property: "og:title", content: "Map — NagarNazar" },
       { property: "og:description", content: "See every reported civic issue on a live map of City." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

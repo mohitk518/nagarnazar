@@ -116,7 +116,7 @@ const Complaints = () => {
       <div className="container py-8 md:py-12">
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">{t("complaints.title")}</h1>
-          <ExportButtons data={exportData} filename="complaints-export" title={tx("Civic Tracker - Complaints Report")} />
+          <ExportButtons data={exportData} filename="complaints-export" title={tx("NagarNazar - Complaints Report")} />
         </div>
         <div className="flex items-center gap-2 flex-wrap mb-6">
           <p className="text-muted-foreground">{t("complaints.subtitle")}</p>

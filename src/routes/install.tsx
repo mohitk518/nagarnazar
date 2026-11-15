@@ -5,10 +5,10 @@ export const Route = createFileRoute("/install")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Install the app — Civic Tracker" },
-      { name: "description", content: "Install Civic Tracker on your phone for quick reporting." },
-      { property: "og:title", content: "Install the app — Civic Tracker" },
-      { property: "og:description", content: "Install Civic Tracker on your phone for quick reporting." },
+      { title: "Install the app — NagarNazar" },
+      { name: "description", content: "Install NagarNazar on your phone for quick reporting." },
+      { property: "og:title", content: "Install the app — NagarNazar" },
+      { property: "og:description", content: "Install NagarNazar on your phone for quick reporting." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

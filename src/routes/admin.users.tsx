@@ -5,9 +5,9 @@ export const Route = createFileRoute("/admin/users")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Users — Civic Tracker" },
+      { title: "Users — NagarNazar" },
       { name: "description", content: "Manage citizen and administrator accounts." },
-      { property: "og:title", content: "Users — Civic Tracker" },
+      { property: "og:title", content: "Users — NagarNazar" },
       { property: "og:description", content: "Manage citizen and administrator accounts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

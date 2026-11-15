@@ -44,7 +44,7 @@ export const exportToPDF = async (data: any[], title: string) => {
         <thead><tr>${headers.map((h) => `<th>${escapeHtml(h.replace(/_/g, " ").toUpperCase())}</th>`).join("")}</tr></thead>
         <tbody>${data.map((row) => `<tr>${headers.map((h) => `<td>${escapeHtml(row[h])}</td>`).join("")}</tr>`).join("")}</tbody>
       </table>
-      <div class="footer">Civic Tracker Report</div>
+      <div class="footer">NagarNazar Report</div>
     </body></html>`;
 
   const win = window.open("", "_blank");

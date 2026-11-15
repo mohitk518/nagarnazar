@@ -5,9 +5,9 @@ export const Route = createFileRoute("/reports")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Reports — Civic Tracker" },
+      { title: "Reports — NagarNazar" },
       { name: "description", content: "Download civic complaint reports and analytics." },
-      { property: "og:title", content: "Reports — Civic Tracker" },
+      { property: "og:title", content: "Reports — NagarNazar" },
       { property: "og:description", content: "Download civic complaint reports and analytics." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

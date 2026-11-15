@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-If you find a security issue in Civic Tracker, please do not open a public issue.
+If you find a security issue in NagarNazar, please do not open a public issue.
 Report it privately through GitHub: open the Security tab of this repository and choose "Report a vulnerability".
 
 Please include:

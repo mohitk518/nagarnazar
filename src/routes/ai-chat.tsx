@@ -5,9 +5,9 @@ export const Route = createFileRoute("/ai-chat")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Civic assistant — Civic Tracker" },
+      { title: "Civic assistant — NagarNazar" },
       { name: "description", content: "Ask the civic assistant about complaints, departments and status." },
-      { property: "og:title", content: "Civic assistant — Civic Tracker" },
+      { property: "og:title", content: "Civic assistant — NagarNazar" },
       { property: "og:description", content: "Ask the civic assistant about complaints, departments and status." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

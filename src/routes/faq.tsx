@@ -5,9 +5,9 @@ export const Route = createFileRoute("/faq")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "FAQ — Civic Tracker" },
+      { title: "FAQ — NagarNazar" },
       { name: "description", content: "Answers to common questions about reporting civic issues in City." },
-      { property: "og:title", content: "FAQ — Civic Tracker" },
+      { property: "og:title", content: "FAQ — NagarNazar" },
       { property: "og:description", content: "Answers to common questions about reporting civic issues in City." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

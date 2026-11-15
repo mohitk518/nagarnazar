@@ -12,7 +12,12 @@ export const translations = {
   "nav.admin": { en: "Admin", hi: "एडमिन" },
   "nav.signIn": { en: "Sign In", hi: "साइन इन" },
   "nav.signOut": { en: "Sign Out", hi: "साइन आउट" },
-  "nav.civicTracker": { en: "Civic Tracker", hi: "सिविक ट्रैकर" },
+  "nav.appName": { en: "NagarNazar", hi: "नगर नज़र" },
+  "brand.tagline": {
+    en: "Your city, under watch. Every complaint tracked, every fix proven.",
+    hi: "आपका शहर, आपकी नज़र। हर शिकायत ट्रैक, हर काम का सबूत।",
+  },
+  "footer.builtFor": { en: "Built for RunUp Coders Hackathon 2026", hi: "RunUp Coders Hackathon 2026 के लिए बनाया गया" },
   "nav.polls": { en: "Polls", hi: "मतदान" },
   "nav.heatmap": { en: "Heatmap", hi: "हीटमैप" },
   "nav.departments": { en: "Departments", hi: "विभाग" },
@@ -115,7 +120,7 @@ export const translations = {
 
   // FAQ
   "faq.title": { en: "FAQ", hi: "सामान्य प्रश्न" },
-  "faq.subtitle": { en: "Frequently asked questions about Civic Tracker", hi: "सिविक ट्रैकर के बारे में अक्सर पूछे जाने वाले प्रश्न" },
+  "faq.subtitle": { en: "Frequently asked questions about NagarNazar", hi: "नगर नज़र के बारे में अक्सर पूछे जाने वाले प्रश्न" },
   "faq.q1": { en: "How do I submit a complaint?", hi: "मैं शिकायत कैसे दर्ज करूं?" },
   "faq.a1": { en: "Go to the Home page, fill out the complaint form with a photo, description, category, and location. Click 'Submit Complaint' and you'll receive a unique complaint ID.", hi: "होम पेज पर जाएं, फोटो, विवरण, श्रेणी और स्थान के साथ शिकायत फॉर्म भरें। 'शिकायत दर्ज करें' पर क्लिक करें और आपको एक अद्वितीय शिकायत ID मिलेगी।" },
   "faq.q2": { en: "Can I submit a complaint anonymously?", hi: "क्या मैं गुमनाम रूप से शिकायत दर्ज कर सकता हूं?" },

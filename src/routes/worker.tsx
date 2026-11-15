@@ -16,9 +16,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/worker")({
   head: () => ({
     meta: [
-      { title: "Field Worker Jobs — Civic Tracker" },
+      { title: "Field Worker Jobs — NagarNazar" },
       { name: "description", content: "Assigned civic repair jobs with exact location, photos and deadlines." },
-      { property: "og:title", content: "Field Worker Jobs — Civic Tracker" },
+      { property: "og:title", content: "Field Worker Jobs — NagarNazar" },
       { property: "og:description", content: "Assigned civic repair jobs with exact location, photos and deadlines." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -5,9 +5,9 @@ export const Route = createFileRoute("/predictions")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Predictions — Civic Tracker" },
+      { title: "Predictions — NagarNazar" },
       { name: "description", content: "Forecasts of where civic issues are likely to appear next." },
-      { property: "og:title", content: "Predictions — Civic Tracker" },
+      { property: "og:title", content: "Predictions — NagarNazar" },
       { property: "og:description", content: "Forecasts of where civic issues are likely to appear next." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

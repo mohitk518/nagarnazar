@@ -47,10 +47,10 @@ const Navbar = () => {
           </div>
           <div className="flex flex-col leading-tight whitespace-nowrap">
             <span className="font-display font-bold text-foreground text-base tracking-tight">
-              CT — <span className="text-secondary">{tx("City")}</span>
+              {t("nav.appName")}
             </span>
-            <span className="text-[10px] text-muted-foreground font-medium tracking-wide uppercase">
-              {t("nav.civicTracker")}
+            <span className="text-[10px] text-muted-foreground font-medium tracking-wide">
+              {language === "hi" ? "आपका शहर, आपकी नज़र" : "Your city, under watch"}
             </span>
           </div>
         </Link>

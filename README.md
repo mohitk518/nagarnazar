@@ -1,281 +1,143 @@
-# Civic Tracker
+# NagarNazar · नगर नज़र
 
-**Every Complaint Tracked. Every Fix Proven.**
+**Your city, under watch. Every complaint tracked, every fix proven.**
+**आपका शहर, आपकी नज़र। हर शिकायत ट्रैक, हर काम का सबूत।**
 
-Team SANT (Mohit Katara, team lead; Divyansh Mathur) · Unstop CodeQuest 2026 · Pilot city: Ratlam, Madhya Pradesh
+Team SANT — Mohit Katara (Team Lead) · Built for **RunUp Coders Hackathon 2026** (Round 2) · Formerly "Civic Tracker" · Pilot city: Ratlam, Madhya Pradesh
 
-Civic Tracker is a mobile-first, multilingual web platform where citizens report civic problems (garbage, broken roads, waterlogging, streetlights and more) by text, photo or voice, and city officials resolve them in public view. Google Gemini reads every request, suggests the category and priority, answers questions in the citizen's language, and turns the data into hotspots, trend forecasts and reports for planners.
-
-- **Live prototype:** https://civictracker-s-m.lovable.app
-- **Test report:** [docs/END_TO_END_TEST_REPORT.md](docs/END_TO_END_TEST_REPORT.md)
-- **Latest authorized security remediation:** [results, shared-Live impact, integrity and GitHub limitations](docs/FINAL_AUTHORIZED_SECURITY_REMEDIATION.md); [emergency rollback SQL](docs/D1_D4_PUBLIC_ACCESS_ROLLBACK.sql). Includes 26 migrations, daily reward caps, same-city worker opt-in and restricted public data. Compatible code is not yet published.
-- **Hackathon track:** Problem Statement 01, AI for Digital Public Infrastructure & Governance (Theme: Innovation)
-
----
-
-## Built with Google AI
-
-Google AI is the core of Civic Tracker, not an add-on. **Google Gemini powers 9 server functions** across the citizen, official and planner experience, and **Google Sign-In** gives citizens one-tap access.
-
-| Google technology | Where it is used in Civic Tracker | What it does |
-|---|---|---|
-| **Gemini 3 Flash (preview)** | `civic-chat`, AI Chat page | Civic AI assistant. Answers questions from live complaint data and replies in the citizen's language (English, Hindi, Marathi, Tamil, Bengali, Telugu, Gujarati, Punjabi) |
-| **Gemini 2.5 Flash** | `analyze-image`, complaint form | Looks at the uploaded photo and suggests the complaint category |
-| **Gemini 2.5 Flash-Lite** | `generate-summary`, after submission | Writes a short summary and raises the priority when the issue is serious |
-| **Gemini 2.5 Flash-Lite** | `analyze-sentiment` | Scores the tone and urgency of the complaint text |
-| **Gemini 2.5 Flash** | `voice-stt` | Turns spoken complaints into text, including Hindi and Hinglish, exactly as spoken |
-| **Gemini 2.5 Flash** | `voice-transcribe` | Translates a spoken complaint into English and suggests its title, category and priority |
-| **Gemini 2.5 Flash** | `predict-trends`, Predictions page | Forecasts complaint trends for the next two weeks by area and category, in English or Hindi |
-| **Gemini 2.5 Flash-Lite** | `generate-admin-report`, Reports page | Writes the AI insight summary in weekly and monthly admin reports |
-| **Gemini 2.5 Flash** | `whatsapp-webhook` (test mode) | Turns a WhatsApp message into a structured complaint |
-| **Google Sign-In** | Login page, "Continue with Google" | One-tap sign-in for citizens, no new password needed |
-
-**How Gemini is used:** every Gemini call runs on the server, never in the browser, through the Lovable AI Gateway. Gemini uses function calling to return structured fields (category, priority, summary, sentiment, trend), so its output is saved directly in the database and drives the map, dashboard and reports.
-
-Maps in this build use Leaflet with OpenStreetMap data. Google Maps, Firebase and Google Cloud Vision are not used yet.
-
----
-
-## Table of contents
-
-1. [The problem](#the-problem)
-2. [What Civic Tracker does](#what-civic-tracker-does)
-3. [Feature status](#feature-status)
-4. [Architecture](#architecture)
-5. [Tech stack](#tech-stack)
-6. [Project structure](#project-structure)
-7. [Getting started](#getting-started)
-8. [Configuration](#configuration)
-9. [Database](#database)
-10. [Server functions](#server-functions)
-11. [Scaling across India and BRICS](#scaling-across-india-and-brics)
-12. [Roadmap](#roadmap)
-13. [Security and privacy](#security-and-privacy)
-14. [Open-source credits](#open-source-credits)
-15. [License](#license)
+- **Live app:** https://nagarnazar.lovable.app
+- **GitHub:** https://github.com/mohitk518/nagarnazar
+- **What changed in this hackathon:** [New in RunUp Coders Hackathon 2026](#new-in-runup-coders-hackathon-2026)
 
 ---
 
 ## The problem
 
-Citizen feedback in India is spread across many systems. Central grievances go to CPGRAMS, states run their own portals, and local issues such as garbage, roads and drains go to separate city channels. Citizens do not know if anyone is working on their complaint, and governments cannot see where the real demand is. As a result, infrastructure gaps stay hidden and public spending is hard to match with real needs.
+In small Indian cities, a pothole, an overflowing garbage point or a dead streetlight is usually reported by a phone call, a WhatsApp forward or a paper application. The citizen gets no reference number, no idea which department owns the problem, and no proof that anything was fixed. Officials, on the other hand, cannot see which wards keep complaining, which complaints are overdue, or where to send field workers first.
 
-## What Civic Tracker does
+## The solution: Click → Route → Prove
 
-**For citizens**
-- Report a problem in under a minute with a photo, automatic GPS location (or a map picker), category and priority.
-- Speak the complaint instead of typing.
-- Get a unique public ID (for example `CT-142`) and track the status live, with a deadline countdown and a timeline of every update.
-- Ask the Civic AI assistant questions in eight Indian languages.
-- Report anonymously when needed. Only the name is hidden.
-- Comment, upvote, verify ("I have seen this too"), share and rate the resolution.
-- Earn green points and badges from Bronze to Diamond.
+1. **Click** — the citizen takes a photo. GPS location, ward and city are detected; the problem can also be spoken in Hindi or English.
+2. **Route** — the complaint goes automatically to the right department with a deadline (SLA). Overdue complaints escalate.
+3. **Prove** — a complaint is closed only with an after-repair photo. Anyone can open the public complaint page (or scan its QR poster) and see the before/after proof and the full timeline.
 
-**For city officials**
-- City-scoped admin panel: each admin manages the complaints of their own city. The database enforces this with row-level security.
-- Change status (Pending, In Progress, Resolved, Escalated), add admin notes and upload a resolution photo as proof. Citizens see a before and after comparison.
-- Filter by status and city, print complaint posters, export CSV and PDF.
-- Create community polls, manage departments, and generate weekly or monthly AI reports.
-- New officials request admin access. The main admin approves the request, grants the role for one city, and can remove it at any time.
+Target users: citizens, municipal officers / city admins and field workers in small Indian cities.
 
-**For planners**
-- Complaint map with clusters, markers, heatmap and area statistics.
-- Hotspot page with time range, city and category filters and the worst areas.
-- Public analytics dashboard: totals, resolution rate, average resolution time, monthly trend, and breakdowns by category, area and priority.
-- Gemini trend forecast for the next two weeks by area and category.
+## Key features
 
-## Feature status
+**Citizens**
+- Photo + GPS + voice complaint, step-by-step report flow, Hindi and English interface
+- Duplicate warning (same category within ~300 m in the last 7 days)
+- Public complaint page with a unique ID (e.g. `CT-142`), live status, deadline countdown, timeline, QR poster and before/after photos
+- Upvote, "I have seen this too" verification, comments, rating, points and badges, polls
+- Works offline for drafts and can be installed as an app
+- Privacy page and self-service account deletion
 
-Status as verified on 5 November 2026 (see the test report for evidence).
+**Officials and field workers**
+- City-scoped admin panel (row-level security), ward-wise complaint view, worker assignment, field-worker job page
+- After-repair photo required to resolve, merge duplicates, automatic escalation
+- AI weekly/monthly reports, trend predictions, CSV/PDF export
 
-| Status | Features |
-|---|---|
-| **Tested end to end** | Photo complaint with GPS, automatic city/ward/zone detection, department routing with deadline, AI photo category suggestion (citizen must accept), duplicate warning, City Admin merge and undo, worker assignment, field-worker jobs page, after-repair photo required to resolve, public tracking with before/after proof, rating, notification bell, Hindi interface, city isolation and role security |
-| **Tested by automated scripts only** | Automatic escalation (L1 officer, L2 City Admin, L3 Super Admin), Public Accountability Score formula, City Admin applications, new-city onboarding |
-| **Built, not re-tested in this round** | Hindi/English voice input with confirmation, Civic AI chat, trend predictions, AI admin reports, polls, rewards store, leaderboard, heatmap, offline drafts, CSV/PDF export, posters with QR codes |
-| **Needs external setup** | Real SMS (Twilio keys), real WhatsApp intake (business number; built-in simulator works without it), email reports |
-| **Demonstration data** | Ratlam ward boundaries are demo data, not official boundaries |
+**Planners / public**
+- Live map with clusters and heatmap, public dashboard, accountability scores
 
-## Architecture
+## New in RunUp Coders Hackathon 2026
 
-```mermaid
-flowchart TD
-    A[Citizen or official on a phone browser] --> B[React web app, installable PWA]
-    B --> C[Server functions: src/routes/api/public/fn]
-    C --> G[Google Gemini via Lovable AI Gateway]
-    B --> D[Supabase]
-    C --> D
-    D --> D1[(Postgres with row-level security)]
-    D --> D2[Auth: email and Google Sign-In]
-    D --> D3[Storage: complaint photos]
-    D --> D4[Realtime: live status updates]
-    B --> M[Leaflet maps with OpenStreetMap tiles and geocoding]
-```
+Everything below was built between 15 and 24 November 2026; the commit dates on GitHub are the record. Everything else in this README was **pre-existing** in the earlier Civic Tracker project (see [Project history & credits](#project-history--credits)).
 
-Every change is saved in one database and pushed live to all open screens, so the public feed, the map, the dashboard and the AI forecasts all use the same data.
+- **Rebrand to NagarNazar** — new name, Hindi name, tagline, PWA manifest, meta tags, poster/share text and footer in both languages; old competition material removed.
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, TypeScript 5, TanStack Start and TanStack Router, Vite 8 |
+| Frontend | React 19, TypeScript, TanStack Start + TanStack Router, Vite |
 | UI | Tailwind CSS 4, shadcn/ui (Radix UI), lucide-react, framer-motion, sonner |
-| Data fetching | TanStack Query 5 |
-| Maps | Leaflet 1.9, react-leaflet 5, leaflet.markercluster, leaflet.heat, OpenStreetMap |
-| Charts | Recharts 2 |
-| Backend | Supabase (Postgres, Auth, Storage, Realtime), hosted on Lovable Cloud |
-| Server logic | TanStack Start server routes in `src/routes/api/public/fn` |
-| AI | Google Gemini through the Lovable AI Gateway |
+| Data | TanStack Query, Supabase JS client |
+| Maps | Leaflet, react-leaflet, Leaflet.markercluster, Leaflet.heat, OpenStreetMap |
+| Charts | Recharts |
+| Backend | Supabase (Postgres + row-level security, Auth, Storage, Realtime) on Lovable Cloud |
+| Server logic | TanStack Start server routes in `src/routes/api/public/fn` and server functions in `src/lib/*.functions.ts` |
+| AI | Google Gemini (2.5 Flash, 2.5 Flash-Lite, 3 Flash preview) through the Lovable AI Gateway, server-side only |
 
-## Project structure
+### Where AI (Gemini) is used
 
+| Server function | What it does |
+|---|---|
+| `analyze-image` | Suggests a category from the complaint photo (the citizen must confirm it) |
+| `generate-summary` | Short summary and priority check after submission |
+| `analyze-sentiment` | Tone/urgency score |
+| `voice-stt`, `voice-transcribe` | Speech to text (Hindi/Hinglish) and structuring a spoken complaint |
+| `civic-chat` | Chat assistant that answers from live complaint data |
+| `predict-trends`, `generate-admin-report` | Two-week forecasts and AI insights in admin reports |
+| `whatsapp-webhook` | Test-mode WhatsApp intake |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[Citizen / officer / worker\nphone browser or installed PWA] --> A[NagarNazar web app\nReact + TanStack Start]
+    A -->|anon key + RLS| S[(Supabase\nPostgres · Auth · Storage · Realtime)]
+    A --> F[Server functions\n/api/public/fn]
+    F -->|service role, server only| S
+    F --> G[Google Gemini\nvia Lovable AI Gateway]
+    A --> M[Leaflet + OpenStreetMap]
 ```
-.
-├── public/                        Static files, PWA manifest and icons
-├── src/
-│   ├── components/                Reusable UI (map picker, voice input, notification bell, before/after slider, ...)
-│   │   └── pages/                 Screen components (Home, Complaints, Map, Admin, Reports, AI Chat, ...)
-│   ├── contexts/                  Auth and language providers
-│   ├── hooks/                     Data and role hooks
-│   ├── integrations/              Supabase client and Google Sign-In integration
-│   ├── lib/                       Helpers (translations, cities, geocoding, export, main admin config)
-│   └── routes/                    App routes
-│       └── api/public/fn/         Server functions (Gemini features, SMS, WhatsApp webhook, worker simulation)
-├── supabase/
-│   └── config.toml                Backend project config
-├── drizzle/migrations/            Database migrations (schema, policies, triggers)
-├── scripts/                       End-to-end test scripts (run one at a time)
-├── docs/                          Feature audit, security report, end-to-end test report
-├── .env.example                   Environment variables template
-└── README.md
-```
 
-## Getting started
+## Run locally
 
-### Prerequisites
-
-- Node.js 20 or newer, and Bun or npm
-- A Supabase project (or Lovable Cloud)
-- A Lovable AI Gateway key for the Gemini features
-
-### Run locally
+Prerequisites: Node.js 20+ and Bun (or npm), a Supabase project, and a Lovable AI Gateway key for the Gemini features.
 
 ```bash
-git clone <this-repository-url>
-cd civic-tracker
-bun install          # or: npm install
-cp .env.example .env # then fill in your own values
-bun run dev          # or: npm run dev
+git clone https://github.com/mohitk518/nagarnazar.git
+cd nagarnazar
+bun install            # or: npm install
+cp .env.example .env   # fill in your own values — never commit .env
+bun run dev            # or: npm run dev
 ```
 
 Other scripts:
 
 ```bash
-bun run build     # production build
-bun run preview   # preview the production build
-bun run lint      # lint the code
-bun run format    # format the code
+bun run build    # production build
+bun run test     # unit tests (Vitest)
+bun run lint     # ESLint
 ```
 
-### Set up the database
+Database: apply the SQL in `drizzle/migrations` to a fresh Supabase project. The Platform Super Admin is identified by `app_config.root_admin_user_id`, never by email.
 
-Apply the SQL files in `drizzle/migrations` in order to a fresh Supabase (Postgres) project. The Platform Super Admin is identified by a user ID stored in the `app_config` table (`root_admin_user_id`), never by email; set it once for your own account after signing up.
+### Configuration
 
-### Run the tests
-
-```bash
-bun run test                                   # unit tests
-bun scripts/e2e-civic-flow.ts                  # end-to-end, needs server-only env vars
-```
-
-Run end-to-end scripts **one at a time** against a test database. Each script takes a lock and checks that the Super Admin record is unchanged.
-
-## Configuration
-
-All values go in `.env` (copy it from `.env.example`). Never commit the real `.env` file.
-
-| Variable | Where it is used | Purpose |
+| Variable | Where | Purpose |
 |---|---|---|
-| `VITE_SUPABASE_URL` | Browser | URL of your Supabase project |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser | Public (publishable) key |
-| `VITE_SUPABASE_PROJECT_ID` | Browser | Project ID |
-| `SUPABASE_URL` | Server only | Backend URL for server functions |
-| `SUPABASE_PUBLISHABLE_KEY` | Server only | Publishable key for server-side public reads |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Service key. Keep it secret |
-| `LOVABLE_API_KEY` | Server only | Google Gemini through the Lovable AI Gateway |
-| `TWILIO_API_KEY`, `TWILIO_FROM_NUMBER` | Server only | Optional, for real SMS delivery |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` | Browser | Public project URL and publishable (anon) key |
+| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | Server | Backend access for server functions |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Used only on the server (e.g. account deletion). Never shipped to the browser |
+| `LOVABLE_API_KEY` | Server only | Gemini through the Lovable AI Gateway |
+| `TWILIO_API_KEY`, `TWILIO_FROM_NUMBER` | Server only | Optional real SMS |
 
-All values in `.env.example` are placeholders. No real keys are stored in this repository.
-
-## Database
-
-Main tables: `complaints`, `profiles`, `user_roles`, `admin_requests`, `complaint_timeline`, `complaint_comments`, `complaint_upvotes`, `complaint_verifications`, `complaint_ratings`, `departments`, `workers`, `worker_assignments`, `worker_locations`, `notifications`, `polls`, `poll_options`, `poll_votes`, `rewards`, `reward_redemptions`, `achievements`, `user_achievements`, `sla_config`, `sms_log`, `audit_logs`.
-
-Key rules, enforced with row-level security:
-- Anyone can read complaints, so every complaint is public.
-- Only signed-in users can create complaints.
-- City admins can update or delete complaints of their own city only.
-- Only the main admin can grant or remove admin roles.
-
-Triggers create the complaint ID, award green points, update badges and send notifications on new complaints and status changes.
-
-## Server functions
-
-All server functions live in `src/routes/api/public/fn` and run on the server.
-
-| Function | Purpose |
-|---|---|
-| `civic-chat` | Civic AI chat assistant (Gemini) |
-| `analyze-image` | Category suggestion from the complaint photo (Gemini) |
-| `generate-summary` | AI summary and priority check (Gemini) |
-| `analyze-sentiment` | Sentiment and urgency score (Gemini) |
-| `voice-stt` | Speech to text (Gemini) |
-| `voice-transcribe` | Voice complaint translation and structuring (Gemini) |
-| `predict-trends` | Two-week trend forecast (Gemini) |
-| `generate-admin-report` | Weekly or monthly admin report with AI insights (Gemini) |
-| `whatsapp-webhook` | Turns WhatsApp messages into complaints (Gemini, test mode) |
-| `send-sms` | Sends SMS updates through Twilio (needs keys) |
-| `simulate-worker-movement` | Demo movement for field worker tracking |
-
-## Scaling across India and BRICS
-
-- **Across states:** add a city and give it a city admin. OpenStreetMap already covers all of India, and Gemini handles new languages without retraining.
-- **Across BRICS countries:** maps and Gemini work worldwide. A new country needs its city list, interface text and local departments.
-- **As a Digital Public Good:** open-source licence, documentation, open map data, privacy rules and anonymous reporting.
-
-## Roadmap
-
-- Policy Insights: join complaint hotspots with open data such as Census population and infrastructure indices, so Gemini can rank development projects for policymakers.
-- Official ward boundaries for Ratlam and city-specific department routing.
-- Real GPS tracking for field workers.
-- Server push notifications and offline support.
-- More Indian languages in the interface.
+No real keys are stored in this repository.
 
 ## Security and privacy
 
-- Row-level security on every table.
-- User data (accounts, complaints, photos, locations, comments) lives only in the database and storage, never in this repository.
-- Phone numbers and WhatsApp numbers are column-restricted and never shown publicly.
-- Anonymous reporting hides the reporter's name.
-- API keys and service keys stay on the server and are read from environment variables.
-- See [SECURITY.md](SECURITY.md) to report a security issue.
+- Row-level security on every table; city admins only manage their own city.
+- Phone/WhatsApp numbers are column-restricted and never public; anonymous reporting hides the reporter's name.
+- Integrity triggers stop clients from faking status changes, points, escalations or audit logs; rate limits on reporting.
+- Photos are stored in a private bucket and validated by real image bytes before they are served.
+- See [SECURITY.md](SECURITY.md) and the pre-hackathon audit reports in [docs/](docs/).
 
-## AI assistance disclosure
+## Project history & credits
 
-- **Inside the product:** Google Gemini models (via the Lovable AI Gateway) suggest categories, summaries, transcripts and forecasts. Every AI result is a suggestion; citizens and officials confirm it before it is saved as fact.
-- **Building the product:** the code was written with the help of Lovable, an AI app builder, directed and reviewed by Team SANT. Test scripts, documentation and this README were also prepared with AI assistance.
-- **Pre-existing components:** shadcn/ui components, open-source libraries listed below, OpenStreetMap data, and royalty-free Wikimedia Commons photos used only in test records.
+NagarNazar is built on an earlier civic-complaint platform developed by Mohit Katara with Divyansh Mathur. The features listed under 'New in RunUp Coders Hackathon 2026' were developed during this hackathon.
 
-## Open-source credits
+The earlier project (named "Civic Tracker") already had: photo/GPS/voice complaints, duplicate warning, department routing with deadlines and escalation, worker assignment, public complaint pages with QR and before/after proof, map and heatmap, Gemini features, points/badges/polls, multi-city admin, Hindi/English, and the security work documented in `docs/`. Earlier versions of ward routing, offline drafts, the privacy page and AI retries also existed; what was added or rebuilt on top of them during the hackathon is listed in the "New in" section.
 
-Civic Tracker is built on these open-source projects. All are used under their own licences. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## AI assistance and libraries disclosure
 
-- React, TanStack Start, TanStack Router, TanStack Query, Vite, TypeScript, Tailwind CSS, shadcn/ui, Radix UI, lucide-react, framer-motion, sonner
-- Leaflet, react-leaflet, Leaflet.markercluster, Leaflet.heat
-- Map data from OpenStreetMap contributors (ODbL)
-- Recharts, qrcode.react
-- Supabase client libraries
+- **In the product:** Google Gemini via the Lovable AI Gateway. AI results are suggestions that a citizen or official confirms.
+- **Building the product:** code was written with AI assistance (Lovable and Claude), directed and reviewed by Team SANT.
+- **Libraries/APIs:** listed in the tech stack above and in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Map data © OpenStreetMap contributors (ODbL).
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

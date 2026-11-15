@@ -5,9 +5,9 @@ export const Route = createFileRoute("/admin/polls")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Manage polls — Civic Tracker" },
+      { title: "Manage polls — NagarNazar" },
       { name: "description", content: "Create and manage community polls." },
-      { property: "og:title", content: "Manage polls — Civic Tracker" },
+      { property: "og:title", content: "Manage polls — NagarNazar" },
       { property: "og:description", content: "Create and manage community polls." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

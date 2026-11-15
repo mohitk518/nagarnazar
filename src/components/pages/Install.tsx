@@ -58,8 +58,8 @@ const Install = () => {
           </h1>
           <p className="text-muted-foreground text-lg">
             {isHindi
-              ? "सिविक ट्रैकर को ऐप की तरह इंस्टॉल करें — तेज़, आसान, और हमेशा एक टैप दूर।"
-              : "Get Civic Tracker as an app — fast, easy, always one tap away."}
+              ? "नगर नज़र को ऐप की तरह इंस्टॉल करें — तेज़, आसान, और हमेशा एक टैप दूर।"
+              : "Get NagarNazar as an app — fast, easy, always one tap away."}
           </p>
         </motion.div>
 

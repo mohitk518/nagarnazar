@@ -148,17 +148,17 @@ const AdminSMS = () => {
               <div className="flex flex-wrap gap-2 mt-2">
                 <button
                   type="button"
-                  onClick={() => useTemplate(`Civic Tracker: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} register ho gayi hai. Hum jaldi action lenge. Dhanyavaad.`)}
+                  onClick={() => useTemplate(`NagarNazar: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} register ho gayi hai. Hum jaldi action lenge. Dhanyavaad.`)}
                   className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground hover:bg-muted/70"
                 >{tx("Template: Registered")}</button>
                 <button
                   type="button"
-                  onClick={() => useTemplate(`Civic Tracker: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} ab IN PROGRESS hai. Worker bheja gaya hai.`)}
+                  onClick={() => useTemplate(`NagarNazar: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} ab IN PROGRESS hai. Worker bheja gaya hai.`)}
                   className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground hover:bg-muted/70"
                 >{tx("In progress")}</button>
                 <button
                   type="button"
-                  onClick={() => useTemplate(`Civic Tracker: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} RESOLVED ho gayi hai. Feedback dein - Dhanyavaad!`)}
+                  onClick={() => useTemplate(`NagarNazar: Aapki complaint ${selected ? "#" + selected.complaint_id : ""} RESOLVED ho gayi hai. Feedback dein - Dhanyavaad!`)}
                   className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground hover:bg-muted/70"
                 >{tx("Resolved")}</button>
               </div>

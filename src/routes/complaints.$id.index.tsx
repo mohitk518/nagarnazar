@@ -5,9 +5,9 @@ export const Route = createFileRoute("/complaints/$id/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Complaint details — Civic Tracker" },
+      { title: "Complaint details — NagarNazar" },
       { name: "description", content: "Full details, photos and timeline for a reported civic issue." },
-      { property: "og:title", content: "Complaint details — Civic Tracker" },
+      { property: "og:title", content: "Complaint details — NagarNazar" },
       { property: "og:description", content: "Full details, photos and timeline for a reported civic issue." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

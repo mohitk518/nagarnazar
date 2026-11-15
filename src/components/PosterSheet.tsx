@@ -47,7 +47,7 @@ const PosterSheet = ({ complaint, pageBreakAfter = false }: PosterSheetProps) =>
         <div>
           <div className="text-[11px] uppercase tracking-[0.25em] font-semibold opacity-80">
             {tx(" Civic Notice ")}</div>
-          <div className="font-display text-3xl font-bold mt-1">CivicTrack</div>
+          <div className="font-display text-3xl font-bold mt-1">NagarNazar</div>
         </div>
         <div className="text-right">
           <div className="text-[10px] uppercase tracking-widest opacity-80">{tx("Reference")}</div>
@@ -161,7 +161,7 @@ const PosterSheet = ({ complaint, pageBreakAfter = false }: PosterSheetProps) =>
       </div>
 
       <div className="px-10 py-4 bg-gray-900 text-gray-300 flex items-center justify-between text-[10px]">
-        <div className="font-mono">civictrack.app</div>
+        <div className="font-mono">nagarnazar.lovable.app</div>
         <div className="uppercase tracking-widest">{tx("Posted by the community · Please do not remove")}</div>
       </div>
     </div>

@@ -5,9 +5,9 @@ export const Route = createFileRoute("/rewards")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Rewards store — Civic Tracker" },
+      { title: "Rewards store — NagarNazar" },
       { name: "description", content: "Redeem your green points for community rewards." },
-      { property: "og:title", content: "Rewards store — Civic Tracker" },
+      { property: "og:title", content: "Rewards store — NagarNazar" },
       { property: "og:description", content: "Redeem your green points for community rewards." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

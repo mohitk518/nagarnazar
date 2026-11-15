@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Civic Tracker uses the following open-source software and data. Each component is used under its own licence.
+NagarNazar uses the following open-source software and data. Each component is used under its own licence.
 
 | Component | Used for | Licence |
 |---|---|---|

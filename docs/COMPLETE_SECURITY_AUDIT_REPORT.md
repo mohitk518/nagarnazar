@@ -1,6 +1,6 @@
 # Civic Tracker — Complete Security Audit Report
 
-Team SANT (Mohit Katara, Divyansh Mathur) · Unstop CodeQuest 2026 · Pilot: Ratlam, Madhya Pradesh · 2026-11-05 (UTC)
+Team SANT (Mohit Katara, Divyansh Mathur) · pre-hackathon audit of the earlier Civic Tracker project · Pilot: Ratlam, Madhya Pradesh · 2026-11-05 (UTC)
 
 Companion files: `SECURITY_VULNERABILITY_REGISTER.md`, `SECURITY_REMEDIATION_REPORT.md`, `SECURITY_RETEST_REPORT.md`.
 

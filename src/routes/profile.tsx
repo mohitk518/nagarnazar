@@ -5,9 +5,9 @@ export const Route = createFileRoute("/profile")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "My profile — Civic Tracker" },
+      { title: "My profile — NagarNazar" },
       { name: "description", content: "Your complaints, points, badges and account settings." },
-      { property: "og:title", content: "My profile — Civic Tracker" },
+      { property: "og:title", content: "My profile — NagarNazar" },
       { property: "og:description", content: "Your complaints, points, badges and account settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

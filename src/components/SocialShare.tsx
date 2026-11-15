@@ -16,7 +16,7 @@ const SocialShare = ({ title, complaintId }: { title: string; complaintId: strin
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const url = `${window.location.origin}/complaints/${complaintId}`;
-  const text = `Check out this civic complaint: ${title}`;
+  const text = `NagarNazar complaint: ${title} — track every fix`;
 
   const openShareWindow = (shareUrl: string) => {
     window.open(shareUrl, "_blank", "noopener,noreferrer");

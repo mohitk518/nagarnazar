@@ -20,7 +20,7 @@ export async function forwardGeocode(
   const key = `${q.toLowerCase()}::${limit}`;
   if (cache.has(key)) return cache.get(key)!;
 
-  // Bias to India for civic-tracker. Remove `countrycodes` if you want global.
+  // Bias to India for NagarNazar. Remove `countrycodes` if you want global.
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
     q,
   )}&limit=${limit}&addressdetails=1&countrycodes=in`;

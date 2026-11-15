@@ -5,9 +5,9 @@ export const Route = createFileRoute("/admin/whatsapp")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "WhatsApp setup — Civic Tracker" },
+      { title: "WhatsApp setup — NagarNazar" },
       { name: "description", content: "Configure WhatsApp complaint intake." },
-      { property: "og:title", content: "WhatsApp setup — Civic Tracker" },
+      { property: "og:title", content: "WhatsApp setup — NagarNazar" },
       { property: "og:description", content: "Configure WhatsApp complaint intake." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

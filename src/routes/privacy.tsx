@@ -12,10 +12,10 @@ import { deleteMyAccount } from "@/lib/account.functions";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy & Account — Civic Tracker" },
-      { name: "description", content: "How Civic Tracker handles your data, and how to delete your account." },
-      { property: "og:title", content: "Privacy & Account — Civic Tracker" },
-      { property: "og:description", content: "How Civic Tracker handles your data, and how to delete your account." },
+      { title: "Privacy & Account — NagarNazar" },
+      { name: "description", content: "How NagarNazar handles your data, and how to delete your account." },
+      { property: "og:title", content: "Privacy & Account — NagarNazar" },
+      { property: "og:description", content: "How NagarNazar handles your data, and how to delete your account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
