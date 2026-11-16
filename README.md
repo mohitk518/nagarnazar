@@ -137,7 +137,7 @@ Database: apply the SQL in `drizzle/migrations` to a fresh Supabase project. The
 | `LOVABLE_API_KEY` | Server only | Gemini through the Lovable AI Gateway |
 | `TWILIO_API_KEY`, `TWILIO_FROM_NUMBER` | Server only | Optional real SMS |
 
-No real keys are stored in this repository.
+The committed `.env` holds only the public backend URL and publishable key (the hosted build needs them; they are visible in every browser anyway). Secret keys (`SUPABASE_SERVICE_ROLE_KEY`, `LOVABLE_API_KEY`, Twilio) are never committed — they live only in the hosting environment.
 
 ## Security and privacy
 

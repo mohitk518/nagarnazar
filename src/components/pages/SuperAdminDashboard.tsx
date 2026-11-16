@@ -1,3 +1,4 @@
+import { Link } from "@/lib/router-compat";
 import { useUiText } from "@/hooks/useUiText";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,7 @@ const Stat = ({ label, value }: { label: string; value: any }) => {
 
 const SuperAdminDashboard = () => {
   const tx = useUiText();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { isMainAdmin, isLoading } = useIsRootAdmin();
   const [actionFilter, setActionFilter] = useState("");
 
@@ -51,7 +52,18 @@ const SuperAdminDashboard = () => {
     },
   });
 
-  if (!user || isLoading) return <Layout><div className="container mx-auto p-12 text-center text-muted-foreground">{tx("Loading…")}</div></Layout>;
+  if (authLoading || isLoading) return <Layout><div className="container mx-auto p-12 text-center text-muted-foreground">{tx("Loading…")}</div></Layout>;
+  // Signed out: say so instead of loading forever
+  if (!user) {
+    return (
+      <Layout><div className="container mx-auto px-4 py-12 text-center">
+        <Shield className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+        <h1 className="mb-2 text-2xl font-bold">{tx("Restricted")}</h1>
+        <p className="mb-4 text-muted-foreground">{tx("Please sign in to continue.")}</p>
+        <Link to="/auth" className="inline-flex min-h-11 items-center rounded-full bg-secondary px-5 font-bold text-secondary-foreground">{tx("Sign In")}</Link>
+      </div></Layout>
+    );
+  }
   if (!isMainAdmin) {
     return (
       <Layout><div className="container mx-auto px-4 py-12 text-center">
