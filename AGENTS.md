@@ -29,3 +29,5 @@
 - Worker linking requires verified same-city opt-in requests and uses the audited RPC only; direct user_id writes are revoked to prevent bypass.
 - Complaint/upvote rewards use a private lifetime-deduplicated ledger and per-user transaction lock with UTC-day caps; reward redemption never resets earned allowance.
 - Achievement history is owner-only; anonymous worker reads expose active public fields, while authenticated raw worker reads require ownership or city authority to prevent account enumeration.
+
+- `.env` stays committed (not in .gitignore): it holds only public backend keys, and the hosted preview/published builds read it — ignoring it crashes every page.
